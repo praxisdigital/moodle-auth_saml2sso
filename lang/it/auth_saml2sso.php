@@ -76,6 +76,7 @@ $string['error_lockconfig_field_map_firstname']     = 'La mappatura del nome è 
 $string['error_lockconfig_field_map_lastname']      = 'La mappatura del cognome è obbligatoria';
 $string['error_lockconfig_field_map_email']         = 'La mappatura dell\'Indirizzo email è obbligatoria';
 $string['error_novalidemailfromidp']                = 'Il tuo Identity Provider non fornisce un indirizzo email valido';
+$string['error_you_are_still_connected']            = 'Sei ancora connesso a una sessione SSO';
 
 $string['success_config']                           = 'La configurazione è stata salvata correttamente';
 

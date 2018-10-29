@@ -76,6 +76,7 @@ $string['error_lockconfig_field_map_firstname']     = 'The First name in Data ma
 $string['error_lockconfig_field_map_lastname']      = 'The Surname in Data mapping fields is mandatory';
 $string['error_lockconfig_field_map_email']         = 'The Email address in Data mapping fields is mandatory';
 $string['error_novalidemailfromidp']                = 'There is no valid e-mail address from Identity Provider';
+$string['error_you_are_still_connected']            = 'You are still connected in a SSO session';
 
 $string['success_config']                           = 'All the config fields were saved successfully';
 
