@@ -56,7 +56,8 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         'edit_profile' => 0,
         'field_idp_fullname' => 1,
         'field_idp_firstname' => 'cn',
-        'field_idp_lastname' => 'cn'
+        'field_idp_lastname' => 'cn',
+        'delete_if_empty' => false,  // Delete the profile field value if the correspondig attribute is missing/empty
     );
 
     /**
@@ -127,6 +128,69 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         ]];
     }
 
+    protected function get_attribute_mapping($username_attribute) {
+        $configarray = (array) $this->config;
+
+        $moodleattributes = array();
+        $userfields = array_merge($this->userfields, $this->get_custom_user_profile_fields());
+        foreach ($userfields as $field) {
+            if (isset($configarray["field_map_$field"])) {
+                $moodleattributes[$field] = $configarray["field_map_$field"];
+            }
+        }
+
+        $moodleattributes['username'] = $username_attribute;
+
+        return $moodleattributes;
+    }
+
+    /**
+     * Read user information from the current simpleSAMLphp session.
+     *
+     * @param string $username username, if not the current SSO user, returns false
+     *
+     * @return mixed array with no magic quotes or false on error
+     */
+    function get_userinfo($username) {
+        $auth = $this->getsspauth();
+        if (!$auth->isAuthenticated()) {
+            return false;
+        }
+
+        $attributes = $auth->getAttributes();
+        $uid = trim(core_text::strtolower($attributes[$this->config->idpattr][0]));
+        if (core_text::strtolower($username) != $uid) {
+            // Not the current user
+            return false;
+        }
+
+        $attrmap = $this->get_attribute_mapping($this->config->idpattr);
+
+        $result = array();
+        foreach ($attrmap as $key=>$value) {
+            // Check if attribute is present
+            if (empty($attributes[$value])) {
+                // If the IdP aggregate different information sources, an attribute
+                // can be missing due to a temporary problem. It is unreasobable
+                // deleting the old value
+                if ($this->config->delete_if_empty) {
+                    $result[$key] = '';
+                }
+                continue;
+            }
+
+            // Make usename lowercase
+            if ($key == 'username'){
+                $result[$key] = strtolower($attributes[$value][0]);
+            }
+            else {
+                $result[$key] = $attributes[$value][0];
+            }
+        }
+
+        return $result;
+    }
+
     /**
      * @global string $SESSION
      * @return type
@@ -172,7 +236,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $urllogout = filter_var($this->config->logout_url_redir, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED) ? $this->config->logout_url_redir : $CFG->wwwroot;
 
         // Check if we need to sign off users from IdP too
-        if ((int) $this->config->single_signoff ) {
+        if ((int) $this->config->single_signoff) {
             $auth = $this->getsspauth();
 
             $urllogout = $auth->getLogoutURL($urllogout);
@@ -258,42 +322,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             $this->error_page(get_string('error_create_user', self::COMPONENT_NAME));
         }
 
-        // Map fields that we need to update on every login
-        $mapconfig = get_config(self::COMPONENT_NAME);
-        $standardkeys = array_keys(get_object_vars($mapconfig));
-        $customkeys = $this->get_custom_user_profile_fields();
-        $allkeys = array_merge($standardkeys, $customkeys);
-
-        $touched = false;
-        foreach ($allkeys as $key) {
-            if (preg_match('/^field_updatelocal_(.+)$/', $key, $match)) {
-                $field = $match[1];
-                if (!empty($mapconfig->{'field_map_' . $field})) {
-                    $attr = $mapconfig->{'field_map_' . $field};
-                    $updateonlogin = $mapconfig->{'field_updatelocal_' . $field} === 'onlogin';
-
-                    if ($newuser || $updateonlogin) {
-                        // Empty attribute must leave untouched.
-                        if (isset($attributes[$attr]) && count($attributes[$attr]) > 0) {
-                            $USER->$field = $attributes[$attr][0];
-                            $touched = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($touched) {
-            require_once($CFG->dirroot . '/user/lib.php');
-            user_update_user($USER, false, false);
-            profile_save_data($USER);
-        }
+        $isuser = update_user_record_by_id($isuser->id);
 
         // now we get the URL to where user wanna go previouly
         $urltogo = core_login_get_return_url();
 
         // and pass to login method
-        $this->do_login($urltogo);
+        $this->do_login($isuser, $urltogo);
     }
 
     /**
@@ -302,9 +337,10 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * @global type $CFG
      * @param type $urltogo
      */
-    public function do_login($urltogo) {
+    protected function do_login($user, $urltogo) {
         global $USER, $CFG;
-        complete_user_login($USER);
+
+        $USER = complete_user_login($user);
         $USER->loggedin = true;
         $USER->site = $CFG->wwwroot;
         set_moodle_cookie($USER->username);
@@ -413,23 +449,36 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
+     * In loginpage_hook() the page rendering is not active yet, so is not
+     * enoght to throw an Exception.
+     * Probably should be better to invoke Moodle fatal_error() function
+     * instead of rewriting it, but Moodle docs discourage this.
+     *
      * @global type $PAGE
      * @global type $OUTPUT
      * @global type $SITE
      * @param type $msg
      */
-    public function error_page($msg) {
+    protected function error_page($msg) {
         global $PAGE, $OUTPUT, $SITE;
 
         $auth = $this->getsspauth();
 
-        $samlLogout = $auth->getLogoutURL($this->config->logout_url_redir);
+        $urltogo = $this->config->logout_url_redir;
+        if (empty($urltogo)) {
+            $urltogo = (new moodle_url('/'))->out();
+        }
+        $samlLogout = $auth->getLogoutURL($urltogo);
 
         $PAGE->set_course($SITE);
         $PAGE->set_url('/');
+        $PAGE->set_title(get_string('error') . ' - ' . $msg);
+        $PAGE->set_heading($PAGE->course->fullname);
         echo $OUTPUT->header();
-        echo $OUTPUT->box($msg);
-        echo $OUTPUT->box('<a href="' . $samlLogout . '">' . get_string('label_logout', self::COMPONENT_NAME) . '</a>');
+        echo $OUTPUT->box($msg, 'errorbox alert alert-danger', null, array('data-rel' => 'fatalerror'));
+        echo $OUTPUT->box(get_string('error_you_are_still_connected', self::COMPONENT_NAME)
+                . ' <a href="' . $samlLogout . '">'
+                . get_string('label_logout', self::COMPONENT_NAME) . '</a>', 'errorbox alert');
         echo $OUTPUT->footer();
         exit;
     }
