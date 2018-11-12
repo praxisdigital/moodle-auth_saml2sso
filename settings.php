@@ -62,16 +62,12 @@ if ($ADMIN->fulltree) {
         )
     );
 
+    $defaultsspdir = !empty(getenv('SIMPLESAMLPHP_CONFIG_DIR')) ? dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR')) : '';
     $field_setting = 'sp_path';
-    $settings->add(new admin_setting_configtext_with_maxlength(
-            'auth_saml2sso/'. $field_setting,
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
+    $settings->add(new admin_setting_configdirectory('auth_saml2sso/'. $field_setting,
+            new lang_string('label_' . $field_setting, 'auth_saml2sso'),
             new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            !empty(getenv('SIMPLESAMLPHP_CONFIG_DIR')) ? dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR')) : '',
-            PARAM_TEXT,
-            50,
-            255
-        )
+            $defaultsspdir)
     );
     
     // Migrate from misleading entityid config key
@@ -189,6 +185,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('auth_saml2sso/sync_settings',
             new lang_string('label_sync_settings', 'auth_saml2sso'),
             new lang_string('label_sync_settings_help', 'auth_saml2sso')));
+
+    // Migrate form obsolete plugin
+
 
     // The user source plugin, must be a "directory style" auth source.
     $authsavailable = core_component::get_plugin_list('auth');
