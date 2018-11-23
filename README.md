@@ -1,4 +1,6 @@
-# SAML2 Authentication using exists SimpleSAMLphp Service Provider
+# SAML2 SSO
+
+## Moodle authentication using exists SimpleSAMLphp Service Provider
 
 You'll need the following pre-requirement:
 
@@ -8,10 +10,13 @@ You'll need the following pre-requirement:
 
 You are strongly encouraged to use a [SimpleSAMLphp session storage](https://simplesamlphp.org/docs/stable/simplesamlphp-maintenance#section_2) other than the default phpsession.
 
-There are a couple of related SAML plugins for Moodle. Below are the main diferences between this plugin, named as auth_saml2sso, and the others
+There are other SAML plugins for Moodle and the panorama could be confusing.
+Below are the main differences between this plugin, named internally as *auth_saml2sso*, and the others:
 
-* [auth_saml](https://moodle.org/plugins/auth_saml) - There's no compatible version with Moodle 3.0+. The code is obsolete and the plugin go beyond the purpose of a authentication plugin, mixing auth and enrol rules.
-* [auth_saml2](https://moodle.org/plugins/auth_saml2) - It's a complete solution for those that don't have a working SP installation, but, because it generate its own SP, for every single instance of Moodle that you install, you must exchange the metadata with the owner of the IdP. In a environment that there are more than one IdP, this is unpractical.
+* [official Shibboleth plugin](https://docs.moodle.org/35/en/Shibboleth) - Requires a system-level configuration, uses a long-running process, easily protects resource at Apache level, cannot exploit PHP skill, hard to configure for servers hosting multiple Moodle if requirements of each site are different.
+* [SAML Authentication (auth_saml)](https://moodle.org/plugins/auth_saml) - There's no compatible version with Moodle 3.0+. The code is obsolete and the plugin go beyond the purpose of a authentication plugin, mixing auth and enrol rules.
+* [SAML2 Single sign on (auth_saml2)](https://moodle.org/plugins/auth_saml2) - It's a complete solution for those that don't have a working SP installation, but, because it generate its own SP, for every single instance of Moodle that you install, you must exchange the metadata with the owner of the IdP. In a environment that there are more than one IdP, this is unpractical.
+* [OneLogin SAML SSO (onelogin_saml)](https://github.com/onelogin/moodle-saml) - Based on OneLogin libraries, features similar to auth_saml2
 
 The key for this plugin is that you can use your exists Service Provider (SP) without needed to exchange the metadata with the Identity Provider (IdP) for every new Moodle instances. _(for instances in the same host name)_
 
@@ -37,4 +42,23 @@ SAML-based authentication services couldn't provide a user list suitable for use
 
 You can configure the LDAP or DB Moodle auth plugin in order to access to that backend, leaving the plugin itself disabled, and configure SAML2 SSO auth to obtain user list from it.
 
-The option 'Takeover existing users' provides an easy way to migrate  a Moodle system from LDAP (or DB) to SAML-based SSO. User conversion will run as a *scheduled task*.
+## How to migrate users from another plugin to SAML2SSO
+
+A special page handles user migration from plugin based on external backend to
+SAML2SSO. Users handled by the internal Moodle authentication cannot migrate
+because no "authority" can guarantee match between Moodle username and SSO one. 
+ 
+As described in the introduction, some plugins is not compatible with recent
+Moodle releases. The migration feature take in account even users belongin to missing plugins.
+
+## Using other authsources
+
+SimpleSAMLphp is more than a SAML library: it is also an adapter layer
+that can handle several auth sources in a uniform way.
+
+Then SAML2SSO plugin can seamless authenticate against
+[Facebook](https://simplesamlphp.org/docs/stable/authfacebook:authfacebook),
+LinkedIn, Twitter, advanced LDAP and multi-LDAP sources, .htpasswd files, etc.
+
+See [SimpleSAMLphp manual](https://simplesamlphp.org/docs/stable/) for more
+documentation.

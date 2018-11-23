@@ -53,7 +53,7 @@ $string['help_button_name']                         = 'A caption for the login b
 $string['help_sp_path']                             = 'Absolute path to Service Provider (SP) installation. Ex.: /var/www/simplesamlphp/';
 $string['help_dual_login']                          = 'Define if prompt the user with standard Moodle login page';
 $string['help_single_signoff']                      = 'Single Sign Off users from Moodle and IdP?';
-$string['help_idpattr']                             = 'Which attribute from Identity Provider should be used for username?';
+$string['help_idpattr']                             = 'Attribute from the Identity Provider used as the Moodle username.';
 $string['help_moodle_mapping']                      = 'Where to check if the username exists? If using \'' .
         get_string('idnumber') . '\', remember to mapping in Data mapping below';
 $string['help_autocreate']                          = 'Allow create new users?';
@@ -63,7 +63,7 @@ $string['nouser']                                   = 'There is no user with the
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile';
 $string['help_field_idp_firstname']                 = 'Field from Identity Provider containing the user first name' ;
 $string['help_field_idp_lastname']                  = 'Field from Identity Provider containing the user last name';
-$string['help_field_idp_fullname']                  = 'The username from Identity Provider is a single field? If yes, fill with the same value in the fields firstname and lastname below';
+$string['help_field_idp_fullname']                  = 'Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
 
 //error config strings
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';
@@ -84,10 +84,10 @@ $string['label_profile_settings']                   = 'SAML attributes and user 
 
 $string['label_dual_login_settings']  = 'Dual login';
 $string['label_dual_login_help']   = '
-By default, at login users are redirect directly to the IdP or discovery service
+By default Dual login is setted to No and users are redirect to the IdP or discovery service
 configured in the SimpleSAMLphp authentication source.<br />
-To perform Moodle standard login, you should add saml=off parameter. Ex.: /login/index.php?saml=off<br />
-With dual login, user must choose the authentication method.';
+To perform Moodle standard login, add saml=off parameter. Ex.: /login/index.php?saml=off<br />
+Enabling Dual login users have to choose the authentication method.';
 $string['label_sync_settings']        = 'Users sync';
 $string['label_sync_settings_help']   = '
 SAML IdPs cannot provide a user list suitable to users synchronization,
@@ -95,15 +95,32 @@ however they are often backended on a LDAP o DB source able to.
 Configure the plugin for the backend authentication source.';
 $string['label_user_directory']       = 'User directory';
 $string['help_user_directory']        = 'An auth plugin with listing capability';
-$string['label_takeover_users']       = 'Takeover existing users';
-$string['help_takeover_users']        = '
-Existing users belonging to the auth plugin providing user directory
-will switch to ' . $string['pluginname'] . ' authentication.<br/>
-If used at plugin installation, this option provide a migration
-from a Moodle system using LDAP (or DB) authentication to SAML SSO.<br/>
-Conversion took place when run as a ' . get_string('scheduledtasks', 'tool_task') .
-'<br />Setting \'No\', only new users will use SAML SSO.';
 $string['label_verbose_sync']        = 'Show details';
 $string['help_verbose_sync']         = 'Enable verbose report';
 
 $string['synctask']        = 'Users sync';
+
+$string['label_hide_takeover_page']       = 'Hide import page';
+$string['help_hide_takeover_page']        = '
+The import page item appears in the admin menu only if there are
+users belonging to other auth plugins that can be takeover.
+It can be annoying if you want leave these users as-is.';
+
+$string['takeover']             = 'Migrate users to ' . $string['pluginname'];
+$string['label_takeover_link'] = '
+There are still users handled by plugins compatible with this
+one. Do you want <a href="{$a}">import them<a>?';
+$string['label_takeover']       = 'Takeover existing users';
+$string['help_takeover']        = '
+Existing users belonging to the auth plugins listed below could be
+converted to use ' . $string['pluginname'] . ' authentication.
+<br />Deleted users will not migrate.';
+$string['label_takeover_plugin']            = '{$a->auth} ({$a->count} active users)';
+$string['label_takeover_unknown_plugin']    = 'Deleteted or corrupted "{$a->auth}" plugin ({$a->count} active users)';
+
+$string['takeover_nouser']      = 'No plugin selected or plugins with no users';
+$string['takeover_completed']   = 'Users converted';
+$string['takeover_submit']      = 'Convert to ' . $string['pluginname'];
+$string['takeover_count_migrated']      = '{$a->count} users imported from {$a->auth}<br />';
+$string['event_user_migrate']       = 'User imported';
+$string['event_user_migrate_desc']  = 'The user has been migrated to ' . $string['pluginname'];

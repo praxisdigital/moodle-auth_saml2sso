@@ -61,8 +61,16 @@ function xmldb_auth_saml2sso_upgrade($oldversion) {
             // Delete old setting.
             set_config('entityid', null, 'auth_saml2sso');
 
-            upgrade_plugin_savepoint(true, 2017080100, 'auth', 'saml2sso');
+            upgrade_plugin_savepoint(true, 2018031000, 'auth', 'saml2sso');
         }
+    }
+
+    if ($oldversion < 2018112200) {
+        $show_tackeover_page = get_config('auth_saml2sso', 'takeover_users');
+        set_config('hide_takeover_page', !$show_tackeover_page, 'auth_saml2sso');
+        set_config('takeover_users', null, 'auth_saml2sso');
+
+        upgrade_plugin_savepoint(true, 2018112200, 'auth', 'saml2sso');
     }
 
     return true;

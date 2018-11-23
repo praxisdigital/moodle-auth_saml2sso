@@ -32,7 +32,7 @@ $string['label_button_name']                        = 'Etichetta bottone';
 $string['label_sp_path']                            = 'Percorso librerie SimpleSAMLphp';
 $string['label_dual_login']                         = 'Dual login';
 $string['label_single_signoff']                     = 'Single Sign Off';
-$string['label_idpattr']                            = 'Attributo id IdP';
+$string['label_idpattr']                            = 'Attributo ' . get_string('username');
 $string['label_moodle_mapping']                     = 'Campo identificativo';
 $string['label_autocreate']                         = 'Creazione automatica utente';
 $string['label_authsource']                         = 'Nome sorgente autenticazione SP';
@@ -53,17 +53,17 @@ $string['help_button_name']                         = 'Etichetta per il bottone 
 $string['help_sp_path']                             = 'Percorso assoluto dell\'installazione di SSP. Es.: /var/www/simplesamlphp/';
 $string['help_dual_login']                          = 'Mostra all\'utente la maschera di login di Moodle';
 $string['help_single_signoff']                      = 'Il logout da Moodle attiva anche il logout dall\'IdP e dalla sessione di Single SignOn';
-$string['help_idpattr']                             = 'L\'attributo che identifica l\'utente per l\'IdP';
+$string['help_idpattr']                             = 'L\'attributo ricevuto dall\'IdP da usare come ' . get_string('username') . ' in Moodle.';
 $string['help_moodle_mapping']                      = 'Il campo del profilo Moodle con cui cercare l\'utente. Se \'' .
         get_string('idnumber') . '\', ricordarsi di mapparlo nelle impostazioni più sotto';
 $string['help_autocreate']                          = 'Crea l\'utente Moodle all\'accesso se non presente';
 $string['help_authsource']                          = 'Nome della sorgente di autenticazione del Service Provider, come registrata in /config/authsources.php';
 $string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo il logout. Se non è valido o vuoto, si verrà rediretti alla pagina principale di Moodle. (es.: https://go.to/another/url)';
 $string['nouser']                                   = 'Non c\'è un utente Moodle con l\'id restituito e la creazione automatica è disabilitata. L\'id restituito è: ';
-$string['help_edit_profile']                        = 'Se gli utenti non possono modifica il proprio profilo, non vedranno il link al profilo';
-$string['help_field_idp_firstname']                 = 'Attributo dell\'asserzione restituita dall\'IdP contenente il nome' ;
-$string['help_field_idp_lastname']                  = 'Attributo dell\'asserzione restituita dall\'IdP contenente il cognome';
-$string['help_field_idp_fullname']                  = 'Il nome completo è restituito dall\'IdP è un campo unico (es. cn)? Se sì, indicarlo sopra in entrambe gli attributi per il nome e il cognome';
+$string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo';
+$string['help_field_idp_firstname']                 = 'Attributo ricevuto dall\'IdP contenente il nome' ;
+$string['help_field_idp_lastname']                  = 'Attributo ricevuto dall\'IdP contenente il cognome';
+$string['help_field_idp_fullname']                  = 'Il nome completo è restituito dall\'IdP in un campo unico (es. cn)? Se sì, indicarlo sotto in entrambi gli attributi per il nome e il cognome';
 
 //error config strings
 $string['error_create_user']                        = 'Errore nella creazione del profilo Moodle. Contattare l\'amministratore.';
@@ -84,26 +84,44 @@ $string['label_profile_settings']                   = 'Attributi SAML e profilo 
 
 $string['label_dual_login_settings']  = 'Login multiplo';
 $string['label_dual_login_help']   = '
-Per default, gli utenti al login verranno rediretti all\'IdP o al servizio di
+Il default del Dual login è disattivo e gli utenti vengono rediretti all\'IdP o al servizio di
 discovery configurato nella sorgente di autenticazione SimpleSAMLphp.<br />
-Per usare il login standard di Moodle occorre aggiungere il parametro saml=off. Es.: /login/index.php?saml=off<br />
-Con il login multiplo, l\'utente deve scegliere il metodo di autenticazione.';
+In questo caso per usare il login standard di Moodle occorre aggiungere il parametro saml=off. Es.: /login/index.php?saml=off<br />
+Attivano il Dual login l\'utente deve scegliere il metodo di autenticazione.';
 $string['label_sync_settings']        = 'Sincronizzazione utenti';
 $string['label_sync_settings_help']   = '
-Un IdP SAML non può fornire un elenco di utenti da sincronizzare, ma spesso
-ha dietro un backend LDAP o un DB da cui possono essere letti.
-Configurare la relativa sorgente di autenticazione.';
+Un IdP SAML non può fornire un elenco di utenti da sincronizzare, ma può 
+appoggiarsi ad un backend LDAP / DB da cui possono essere letti.
+La configurazione deve quindi essere impostata dal plugin di autenticazione della sorgente';
 $string['label_user_directory']          = 'Origine utenti';
-$string['help_user_directory']           = 'Un plugin di autentiazione in grado di elencare gli utenti';
-$string['label_takeover_users']       = 'Rileva utenti esistenti';
-$string['help_takeover_users']           = '
-Se un utente è già registrato con il metodo di autenticazione dell\'origine
-utenti viene modificato per autenticarsi con ' . $string['pluginname'] . '.<br/>
-Questa opzione, usata all\'installazione, permette di migrare un sistema
-che usa l\'autenticazione LDAP (o DB) al Single SignOn SAML<br/>
-La conversione viene eseguita da ' . get_string('scheduledtasks', 'tool_task') .
-'<br/>Scegliendo No, solo i nuovi utenti useranno il SSO SAML.';
+$string['help_user_directory']           = 'Un plugin di autenticazione in grado di elencare gli utenti';
 $string['label_verbose_sync']        = 'Mostra report';
 $string['help_verbose_sync']         = 'Attiva il report dettagliato';
 
 $string['synctask']        = 'Sincronizzazione utenti';
+
+$string['label_hide_takeover_page']       = 'Nascondi pagina di importazione';
+$string['help_hide_takeover_page']        = '
+La voce della pagina di importazione appare nel menu di amministrazione
+solo se ci sono utenti gestiti da altri plugin di autenticazione che
+possono essere rilevati.
+Può essere fastidiosa se si intende lasciare questi utenti così come sono.';
+
+$string['takeover']             = 'Migrazione utenti a ' . $string['pluginname'];
+$string['label_takeover_link']  = '
+Ci sono ancora utenti gestiti da plutin compatibili con questo.
+Vuoi <a href="{$a}">importarli<a>?';
+$string['label_takeover']       = 'Rileva utenti esistenti';
+$string['help_takeover']        = '
+Gli utenti gestiti dai plugin elencati sotto possono essere convertiti
+per autenticarsi con ' . $string['pluginname'] . '.
+<br />Gli utenti cancellati non saranno migrati.';
+$string['label_takeover_plugin']            = '{$a->auth} (attivi {$a->count} utenti)';
+$string['label_takeover_unknown_plugin']    = 'Plugin "{$a->auth}" cancellato o corrotto (attivi {$a->count} utenti)';
+
+$string['takeover_nouser']      = 'Nessun plugin selezionato o selezionati plugin senza utenti';
+$string['takeover_completed']   = 'Utenti migrati';
+$string['takeover_submit']      = 'Converti a ' . $string['pluginname'];
+$string['takeover_count_migrated']      = '{$a->count} utenti importati da {$a->auth}<br />';
+$string['event_user_migrate']       = 'Utente importato';
+$string['event_user_migrate_desc']  = 'L\'utente è stato convertito per usare ' . $string['pluginname'];
