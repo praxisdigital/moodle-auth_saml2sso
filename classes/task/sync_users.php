@@ -23,10 +23,9 @@
  */
 namespace auth_saml2sso\task;
 
-class sync_users extends \core\task\scheduled_task {
+require_once($CFG->dirroot.'/auth/saml2sso/locallib.php');
 
-    const COMPONENT_NAME = 'auth_saml2sso';
-    const AUTHTYPE_NAME = 'saml2sso';
+class sync_users extends \core\task\scheduled_task {
 
     /**
      * Get a descriptive name for this task (shown to admins).
@@ -34,27 +33,27 @@ class sync_users extends \core\task\scheduled_task {
      * @return string
      */
     public function get_name() {
-        return get_string('synctask', self::COMPONENT_NAME);
+        return get_string('synctask', \auth_saml2sso\COMPONENT_NAME);
     }
 
     /**
      * Run users sync.
      */
     public function execute() {
-        if (!is_enabled_auth(self::AUTHTYPE_NAME)) {
-            mtrace(self::AUTHTYPE_NAME . ' plugin is disabled, synchronisation stopped');
+        if (!is_enabled_auth(\auth_saml2sso\AUTH_NAME)) {
+            mtrace(\auth_saml2sso\AUTH_NAME . ' plugin is disabled, synchronisation stopped');
             return;
         }
 
-        $sync = get_auth_plugin(self::AUTHTYPE_NAME);
-        $config = get_config(self::COMPONENT_NAME);
+        $sync = get_auth_plugin(\auth_saml2sso\AUTH_NAME);
+        $config = get_config(\auth_saml2sso\COMPONENT_NAME);
         if ($config->verbose_sync) {
             $trace = new \text_progress_trace();
         }
         else {
             $trace = new \null_progress_trace();
         }
-        $update = !empty($config->takeover_users);
+        $update = false;
 
         if (empty($config->user_directory)) {
             mtrace('Auth source not set, synchronisation stopped');
@@ -67,13 +66,13 @@ class sync_users extends \core\task\scheduled_task {
             return;
         }
 
-        $sourceplugin->authtype = self::AUTHTYPE_NAME;
+        $sourceplugin->authtype = \auth_saml2sso\AUTH_NAME;
         $ref = new \ReflectionMethod($sourceplugin, 'sync_users');
         if ($ref->getNumberOfParameters() == 1) {
-            $sourceplugin->sync_users($config->takeover_users);
+            $sourceplugin->sync_users($update);
         }
         elseif ($ref->getNumberOfParameters() == 2) {
-            $sourceplugin->sync_users($trace, $config->takeover_users);
+            $sourceplugin->sync_users($trace, $update);
         }
         else {
             mtrace('Unhandled sync_user() method in auth plugin ' . $config->user_directory);

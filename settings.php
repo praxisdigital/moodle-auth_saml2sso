@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -21,57 +20,46 @@
  * @package auth_saml2sso
  * @copyright  2017 Stephen Bourget
  * @author Daniel Miranda <daniellopes at gmail.com>
+ * @author Marco Ferrante <marco at csita.unige.it>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
 
-/**
- * An helper to test if a plugin can sync users.
- *
- * @param type $plugin An auth plugin
- * @return bool true if $plugin can sync users
- */
-if (!function_exists('Can_sync_user')) {
-    function Can_sync_user($plugin) {
-        if ($plugin instanceof auth_plugin_base
-                && method_exists($plugin, 'sync_users')) {
-            // Check argument number?
-            return true;
-        }
+require_once($CFG->dirroot . '/auth/saml2sso/locallib.php'); // require_once('locallib.php') is ambigous
 
-        return false;
-    }
+$usertotakeover = auth_saml2sso\get_known_plugin();
+$takeoverpage = "$CFG->wwwroot/auth/saml2sso/takeover.php";
+
+if ($hassiteconfig && !get_config(auth_saml2sso\COMPONENT_NAME, 'hide_takeover_page')
+        && !empty($usertotakeover)) {
+    $ADMIN->add('authsettings', new admin_externalpage('takeover', new lang_string('takeover', auth_saml2sso\COMPONENT_NAME),
+         $takeoverpage));
 }
-
 
 if ($ADMIN->fulltree) {
 
     if (empty(getenv('SIMPLESAMLPHP_CONFIG_DIR'))
-            && empty(get_config('auth_saml2sso', 'sp_path'))) {
+            && empty(get_config(auth_saml2sso\COMPONENT_NAME, 'sp_path'))) {
         $warning = $OUTPUT->notification('SIMPLESAMLPHP_CONFIG_DIR environment variable is not set'
                 . ', review your Apache configuration or manually specify the lib path', \core\output\notification::NOTIFY_WARNING);
-        $settings->add(new admin_setting_heading('auth_saml2sso/envvar_missing', '', $warning));
+        $settings->add(new admin_setting_heading(auth_saml2sso\COMPONENT_NAME . '/envvar_missing', '', $warning));
     }
 
-    $yesno = array(get_string('no'), get_string('yes'));
+    $yesno = [get_string('no'), get_string('yes')];
 
     $settings->add(new admin_setting_heading(
-            'auth_saml2sso/pluginname', 
-            new lang_string('settings_saml2sso', 'auth_saml2sso'), 
-            new lang_string('auth_saml2ssodescription', 'auth_saml2sso')
+            auth_saml2sso\COMPONENT_NAME . '/pluginname',
+            new lang_string('settings_saml2sso', auth_saml2sso\COMPONENT_NAME),
+            new lang_string('auth_saml2ssodescription', auth_saml2sso\COMPONENT_NAME)
         )
     );
 
+    $defaultsspdir = !empty(getenv('SIMPLESAMLPHP_CONFIG_DIR')) ? dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR')) : '';
     $field_setting = 'sp_path';
-    $settings->add(new admin_setting_configtext_with_maxlength(
-            'auth_saml2sso/'. $field_setting,
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
+    $settings->add(new admin_setting_configdirectory('auth_saml2sso/'. $field_setting,
+            new lang_string('label_' . $field_setting, 'auth_saml2sso'),
             new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            !empty(getenv('SIMPLESAMLPHP_CONFIG_DIR')) ? dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR')) : '',
-            PARAM_TEXT,
-            50,
-            255
-        )
+            $defaultsspdir)
     );
     
     // Migrate from misleading entityid config key
@@ -122,11 +110,11 @@ if ($ADMIN->fulltree) {
     );
     
     $field_setting = 'moodle_mapping';
-    $fields = array(
+    $fields = [
         'username' => get_string('username'),
         'idnumber' => get_string('idnumber'),
         'email' => get_string('email'),
-    );
+    ];
     $settings->add(new admin_setting_configselect(
             'auth_saml2sso/' . $field_setting, 
             new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
@@ -186,22 +174,28 @@ if ($ADMIN->fulltree) {
     );
 
     // User synchronization with external source
-    $settings->add(new admin_setting_heading('auth_saml2sso/sync_settings',
-            new lang_string('label_sync_settings', 'auth_saml2sso'),
-            new lang_string('label_sync_settings_help', 'auth_saml2sso')));
+    $settings->add(new admin_setting_heading(auth_saml2sso\COMPONENT_NAME . '/sync_settings',
+            new lang_string('label_sync_settings', auth_saml2sso\COMPONENT_NAME),
+            new lang_string('label_sync_settings_help', auth_saml2sso\COMPONENT_NAME)));
+
+    if (!get_config(auth_saml2sso\COMPONENT_NAME, 'hide_takeover_page') && !empty($usertotakeover)) {
+        $warning = $OUTPUT->notification(new lang_string('label_takeover_link', auth_saml2sso\COMPONENT_NAME, $takeoverpage),
+                \core\output\notification::NOTIFY_WARNING);
+        $settings->add(new admin_setting_heading(auth_saml2sso\COMPONENT_NAME . '/other_plugins', '', $warning));
+    }
 
     // The user source plugin, must be a "directory style" auth source.
     $authsavailable = core_component::get_plugin_list('auth');
     $cansyncauthplugins = array();
     foreach ($authsavailable as $auth => $dir) {
         $authplugin = get_auth_plugin($auth);
-        if (Can_sync_user($authplugin)) {
+        if (\auth_saml2sso\can_sync_user($authplugin)) {
             $cansyncauthplugins[$auth] = $authplugin;
         }
     }
-
+    
     $field_setting = 'user_directory';
-    $fields = array();
+    $fields = [];
     foreach($cansyncauthplugins as $auth => $authplugin) {
         $fields[$auth] = $authplugin->get_title();
     }
@@ -215,7 +209,7 @@ if ($ADMIN->fulltree) {
         )
     );
 
-    $field_setting = 'takeover_users';
+    $field_setting = 'verbose_sync';
     $settings->add(new admin_setting_configselect(
             'auth_saml2sso/' . $field_setting,
             new lang_string('label_' . $field_setting, 'auth_saml2sso'),
@@ -225,12 +219,12 @@ if ($ADMIN->fulltree) {
         )
     );
 
-    $field_setting = 'verbose_sync';
+    $field_setting = 'hide_takeover_page';
     $settings->add(new admin_setting_configselect(
             'auth_saml2sso/' . $field_setting,
             new lang_string('label_' . $field_setting, 'auth_saml2sso'),
             new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            0,
+            1,
             $yesno
         )
     );

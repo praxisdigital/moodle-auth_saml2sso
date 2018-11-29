@@ -24,6 +24,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/authlib.php');
+require_once($CFG->dirroot . '/auth/saml2sso/locallib.php');
 
 /**
  * Plugin for authentication using SimpleSAMLphp Service Provider
@@ -34,7 +35,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     /**
      * The name of the component. Used by the configuration.
      */
-    const COMPONENT_NAME = 'auth_saml2sso';
+    const COMPONENT_NAME = \auth_saml2sso\COMPONENT_NAME; //'auth_saml2sso';
     /**
      * Legacy name of the component.
      */
@@ -75,7 +76,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * Constructor
      */
     public function __construct() {
-        $this->authtype = 'saml2sso';
+        $this->authtype = \auth_saml2sso\AUTH_NAME;
         $componentName = (array) get_config(self::COMPONENT_NAME);
         $legacyComponentName = (array) get_config(self::LEGACY_COMPONENT_NAME);
         $this->config = (object) array_merge($this->defaults, $componentName, $legacyComponentName);
