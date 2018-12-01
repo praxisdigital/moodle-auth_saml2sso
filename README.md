@@ -32,9 +32,64 @@ The key for this plugin is that you can use your exists Service Provider (SP) wi
 * Logout URL to redirect users after logout
 * User synchronization source (see below)
 * Allow users to edit or not the profile
-* Ability to break the full name from IdP into firstname and lastname
+* ~~Ability to break the full name from IdP into firstname and lastname~~ *deprecated, see below*
 
 To override the authentication and login directly in Moodle (ex.: using admin account), add the `saml=off` parameter in the URL (ex.: https://my.moodle/login/index.php?saml=off)
+
+## Break the full name from IdP
+
+One of the distinctive feature of the first release of SAML2 SSO plugin was the ability to
+break the full name from IdP into the first name and the last name.
+It was related to the old version of Moodle auth base plugin.
+Nowadays, adminting there are some IdPs still serving the full name and not 
+the first and last name (such as givenName and sn in LDAP idiom) you can use a
+SimpleSAMLphp *authproc*.
+
+For example, in order to replicate the old behaviour if you receive
+the full name in the attribute urn:oid:2.5.4.3 (e.g. from a Shibboleth IdP) you
+can add to the authsource or to the IdP metadata:
+
+```
+'authproc' => array(
+    array(
+        'class' => 'core:PHP',
+        'code' => '
+// First name attribute
+$attributes["givenName"][] = strstr($attributes["urn:oid:2.5.4.3"][0], " ", true)
+        ? strtoupper(trim(strstr($attributes["urn:oid:2.5.4.3"][0], " ", true)))
+        : strtoupper(trim($attributes["urn:oid:2.5.4.3"][0]));
+// Last name attribute
+$attributes["sn"][] = strstr($attributes["urn:oid:2.5.4.3"][0], " ")
+        ? strtoupper(trim(strstr($attributes["urn:oid:2.5.4.3"][0], " ")))
+        : strtoupper(trim($attributes["urn:oid:2.5.4.3"][0]));
+    ',
+),
+```
+
+Or, to emulate it in a compact way:
+
+```
+'authproc' => array(
+    15 => array(
+        'class' => 'core:AttributeAlter',
+        'subject' => 'urn:oid:2.5.4.3',
+        'pattern' => '/^([^ ]+)/',
+        'target' => 'givenName',
+        '%replace',
+    ),
+    16 => array(
+        'class' => 'core:AttributeAlter',
+        'subject' => 'urn:oid:2.5.4.3',
+        'pattern' => '/([^\\s]+)$/',
+        'target' => 'sn',
+        '%replace',
+    ),
+```
+
+And then mapping the attribute `givenName` and `sn` as usual.
+
+See the [SimpleSAMLphp documentation](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc) on Authproc.
+
 
 ## User synchronization
 

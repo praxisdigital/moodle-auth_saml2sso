@@ -61,9 +61,9 @@ $string['help_authsource']                          = 'Service Provider authenti
 $string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url)';
 $string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile';
-$string['help_field_idp_firstname']                 = 'Field from Identity Provider containing the user first name' ;
-$string['help_field_idp_lastname']                  = 'Field from Identity Provider containing the user last name';
-$string['help_field_idp_fullname']                  = 'Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
+$string['help_field_idp_firstname']                 = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user first name' ;
+$string['help_field_idp_lastname']                  = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user last name';
+$string['help_field_idp_fullname']                  = '<strong>deprecated, use an authproc</strong> Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
 
 //error config strings
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';

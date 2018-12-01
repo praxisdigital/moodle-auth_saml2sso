@@ -572,6 +572,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             }
         }
 
+        if ($this->config->field_idp_fullname) {
+            echo $OUTPUT->notification('The feature <tt>field_idp_fullname</tt> of splitting the full '
+                    . 'name into the first and the last names '
+                    . 'is deprecated and will be remove in the future. '
+                    . 'Use an authproc in the SimpleSAMLphp config to achieve the same result.',
+                    \core\output\notification::NOTIFY_WARNING);
+        }
+
         echo $OUTPUT->notification('Everything seems ok', \core\output\notification::NOTIFY_SUCCESS);
     }
 

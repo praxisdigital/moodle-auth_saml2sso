@@ -61,9 +61,9 @@ $string['help_authsource']                          = 'Nome della sorgente di au
 $string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo il logout. Se non è valido o vuoto, si verrà rediretti alla pagina principale di Moodle. (es.: https://go.to/another/url)';
 $string['nouser']                                   = 'Non c\'è un utente Moodle con l\'id restituito e la creazione automatica è disabilitata. L\'id restituito è: ';
 $string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo';
-$string['help_field_idp_firstname']                 = 'Attributo ricevuto dall\'IdP contenente il nome' ;
-$string['help_field_idp_lastname']                  = 'Attributo ricevuto dall\'IdP contenente il cognome';
-$string['help_field_idp_fullname']                  = 'Il nome completo è restituito dall\'IdP in un campo unico (es. cn)? Se sì, indicarlo sotto in entrambi gli attributi per il nome e il cognome';
+$string['help_field_idp_firstname']                 = '<strong>deprecato, usare una authproc</strong> Attributo ricevuto dall\'IdP contenente il nome' ;
+$string['help_field_idp_lastname']                  = '<strong>deprecato, usare una authproc</strong> Attributo ricevuto dall\'IdP contenente il cognome';
+$string['help_field_idp_fullname']                  = '<strong>deprecato, usare una authproc</strong> Il nome completo è restituito dall\'IdP in un campo unico (es. cn)? Se sì, indicarlo sotto in entrambi gli attributi per il nome e il cognome';
 
 //error config strings
 $string['error_create_user']                        = 'Errore nella creazione del profilo Moodle. Contattare l\'amministratore.';
