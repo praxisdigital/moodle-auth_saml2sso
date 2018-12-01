@@ -77,6 +77,7 @@ $string['error_lockconfig_field_map_lastname']      = 'La mappatura del cognome 
 $string['error_lockconfig_field_map_email']         = 'La mappatura dell\'Indirizzo email è obbligatoria';
 $string['error_novalidemailfromidp']                = 'Il tuo Identity Provider non fornisce un indirizzo email valido';
 $string['error_you_are_still_connected']            = 'Sei ancora connesso a una sessione SSO';
+$string['error_nokey']                              = 'L\'Identity Provider non ha fornito un attributo necessario per identificarti';
 
 $string['success_config']                           = 'La configurazione è stata salvata correttamente';
 
@@ -125,3 +126,5 @@ $string['takeover_submit']      = 'Converti a ' . $string['pluginname'];
 $string['takeover_count_migrated']      = '{$a->count} utenti importati da {$a->auth}<br />';
 $string['event_user_migrate']       = 'Utente importato';
 $string['event_user_migrate_desc']  = 'L\'utente è stato convertito per usare ' . $string['pluginname'];
+$string['event_not_searchable']         = 'Utente SSO non identificabile';
+$string['event_not_searchable_desc']    = 'L\'IdP non ha fornito l\'attributo richiesto per cercare l\'utente';
