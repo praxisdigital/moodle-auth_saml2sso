@@ -12,9 +12,9 @@ namespace auth_saml2sso\event;
 require_once($CFG->dirroot.'/auth/saml2sso/locallib.php');
 
 /**
- * The SAML2SSO event class.
+ * The SAML2SSO event class for incomplete data from the IdP
  **/
-class user_migrated extends \core\event\base {
+class not_searchable extends \core\event\base {
 
     protected function init() {
         $this->context = \context_system::instance();
@@ -23,11 +23,11 @@ class user_migrated extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('event_user_migrate', \auth_saml2sso\COMPONENT_NAME);
+        return get_string('event_not_searchable', \auth_saml2sso\COMPONENT_NAME);
     }
 
     public function get_description() {
-        return get_string('event_user_migrate_desc', \auth_saml2sso\COMPONENT_NAME);
+        return get_string('event_not_searchable_desc', \auth_saml2sso\COMPONENT_NAME);
     }
 
 }

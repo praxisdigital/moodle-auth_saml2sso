@@ -17,6 +17,7 @@
 /**
  * @package auth_saml2sso
  * @author Daniel Miranda <daniellopes at gmail.com>
+ * @author Marco Ferrante, AulaWeb/University of Genoa <staff@aulaweb.unige.it>
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  * Parts of the code was original made for another moodle plugin available at
  * https://moodle.org/plugins/auth_saml2
@@ -129,7 +130,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         ]];
     }
 
-    protected function get_attribute_mapping($username_attribute) {
+    protected function get_attribute_mapping($username_attribute = null) {
         $configarray = (array) $this->config;
 
         $moodleattributes = array();
@@ -140,7 +141,9 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             }
         }
 
-        $moodleattributes['username'] = $username_attribute;
+        if ($username_attribute) {
+            $moodleattributes['username'] = $username_attribute;
+        }
 
         return $moodleattributes;
     }
@@ -298,8 +301,15 @@ class auth_plugin_saml2sso extends auth_plugin_base {
          */
         $uid = trim(core_text::strtolower($attributes[$this->config->idpattr][0]));
 
-        // Now we check if the Id returned from IdP exists in our Moodle database
-        $isuser = $DB->get_record('user', array($this->config->moodle_mapping => $uid));
+        // Now we check if the key returned from IdP exists in our Moodle database
+        $attributes = $this->get_userinfo($uid);
+        if (!isset($attributes[$this->config->moodle_mapping])) {
+            $event = \auth_saml2sso\event\not_searchable::create(array());
+            $event->trigger();
+            $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
+        }
+        $criteria = array($this->config->moodle_mapping => $attributes[$this->config->moodle_mapping]);
+        $isuser = $DB->get_record('user', $criteria);
 
         $newuser = false;
         if (!$isuser) {
@@ -529,6 +539,19 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             return;
         }
 
+        if (empty($this->config->idpattr)) {
+            echo $OUTPUT->notification('The attribute from the IdP to use as Moodle Username is not set',
+                    \core\output\notification::NOTIFY_WARNING);
+        }
+        else {
+            $attrmap = $this->get_attribute_mapping($this->config->idpattr);
+            if (empty($attrmap[$this->config->moodle_mapping])) {
+                echo $OUTPUT->notification('The user will be search by ' . $this->config->moodle_mapping
+                        . ' but no attribute from the IdP is map to this field',
+                        \core\output\notification::NOTIFY_WARNING);
+            }
+        }
+
         if (!empty($this->config->user_directory)) {
             $plugin = get_auth_plugin($this->config->user_directory);
             if (!$plugin) {
@@ -547,6 +570,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 echo $OUTPUT->notification('A sync process with \'' . get_string('pluginname', 'auth_'.$this->config->user_directory)
                         . '\' auth plugin is enable. Please check its configuration too.', \core\output\notification::NOTIFY_INFO);
             }
+        }
+
+        if ($this->config->field_idp_fullname) {
+            echo $OUTPUT->notification('The feature <tt>field_idp_fullname</tt> of splitting the full '
+                    . 'name into the first and the last names '
+                    . 'is deprecated and will be remove in the future. '
+                    . 'Use an authproc in the SimpleSAMLphp config to achieve the same result.',
+                    \core\output\notification::NOTIFY_WARNING);
         }
 
         echo $OUTPUT->notification('Everything seems ok', \core\output\notification::NOTIFY_SUCCESS);

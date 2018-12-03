@@ -61,15 +61,15 @@ $string['help_authsource']                          = 'Service Provider authenti
 $string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url)';
 $string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile';
-$string['help_field_idp_firstname']                 = 'Field from Identity Provider containing the user first name' ;
-$string['help_field_idp_lastname']                  = 'Field from Identity Provider containing the user last name';
-$string['help_field_idp_fullname']                  = 'Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
+$string['help_field_idp_firstname']                 = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user first name' ;
+$string['help_field_idp_lastname']                  = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user last name';
+$string['help_field_idp_fullname']                  = '<strong>deprecated, use an authproc</strong> Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
 
 //error config strings
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';
 $string['error_sp_path']                            = 'The path to SimpleSAMLphp libraries must be given in config';
 $string['error_idpattr']                            = 'A Username mapping attribute must be given';
-$string['error_authsource']                           = 'A Service Provider source name must be given';
+$string['error_authsource']                         = 'A Service Provider source name must be given';
 $string['error_field_idp_firstname']                = 'The Firstname field from Identity Provider is mandatory';
 $string['error_field_idp_lastname']                 = 'The lastname field from Identity Provider is mandatory';
 $string['error_lockconfig_field_map_firstname']     = 'The First name in Data mapping fields is mandatory';
@@ -77,6 +77,7 @@ $string['error_lockconfig_field_map_lastname']      = 'The Surname in Data mappi
 $string['error_lockconfig_field_map_email']         = 'The Email address in Data mapping fields is mandatory';
 $string['error_novalidemailfromidp']                = 'There is no valid e-mail address from Identity Provider';
 $string['error_you_are_still_connected']            = 'You are still connected in a SSO session';
+$string['error_nokey']                              = 'The Identity Provider has not provide the attribute need to identify you';
 
 $string['success_config']                           = 'All the config fields were saved successfully';
 
@@ -124,3 +125,5 @@ $string['takeover_submit']      = 'Convert to ' . $string['pluginname'];
 $string['takeover_count_migrated']      = '{$a->count} users imported from {$a->auth}<br />';
 $string['event_user_migrate']       = 'User imported';
 $string['event_user_migrate_desc']  = 'The user has been migrated to ' . $string['pluginname'];
+$string['event_not_searchable']         = 'Not identifiable SSO user';
+$string['event_not_searchable_desc']    = 'The IdP doesn\'t provided the attribute need to search for the user';
