@@ -110,7 +110,7 @@ Può essere fastidiosa se si intende lasciare questi utenti così come sono.';
 
 $string['takeover']             = 'Migrazione utenti a ' . $string['pluginname'];
 $string['label_takeover_link']  = '
-Ci sono ancora utenti gestiti da plutin compatibili con questo.
+Ci sono ancora utenti gestiti da plugin compatibili con questo.
 Vuoi <a href="{$a}">importarli<a>?';
 $string['label_takeover']       = 'Rileva utenti esistenti';
 $string['help_takeover']        = '
@@ -128,3 +128,5 @@ $string['event_user_migrate']       = 'Utente importato';
 $string['event_user_migrate_desc']  = 'L\'utente è stato convertito per usare ' . $string['pluginname'];
 $string['event_not_searchable']         = 'Utente SSO non identificabile';
 $string['event_not_searchable_desc']    = 'L\'IdP non ha fornito l\'attributo richiesto per cercare l\'utente';
+
+$string['privacy:metadata'] = 'Il plugin di autenticazione SAML2 SSO non registra alcun dato personale.';
