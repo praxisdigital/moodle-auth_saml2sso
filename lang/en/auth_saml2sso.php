@@ -127,3 +127,5 @@ $string['event_user_migrate']       = 'User imported';
 $string['event_user_migrate_desc']  = 'The user has been migrated to ' . $string['pluginname'];
 $string['event_not_searchable']         = 'Not identifiable SSO user';
 $string['event_not_searchable_desc']    = 'The IdP doesn\'t provided the attribute need to search for the user';
+
+$string['privacy:metadata'] = 'The SAML2 SSO authentication plugin does not store any personal data.';
