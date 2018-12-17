@@ -36,7 +36,7 @@ The key for this plugin is that you can use your exists Service Provider (SP) wi
 
 To override the authentication and login directly in Moodle (ex.: using admin account), add the `saml=off` parameter in the URL (ex.: https://my.moodle/login/index.php?saml=off)
 
-## Break the full name from IdP
+## Split the full name from IdP
 
 One of the distinctive feature of the first release of SAML2 SSO plugin was the ability to
 break the full name from IdP into the first name and the last name.
