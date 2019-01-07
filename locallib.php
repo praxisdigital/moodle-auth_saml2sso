@@ -56,6 +56,8 @@ function get_known_plugin($knownauthplugins = LOCAL_AUTH_PLUGINS) {
 
     $authsavailable = \core_component::get_plugin_list('auth');
 
+    $fields = [];
+
     // Check for authsources assigned in user table, even if the plugin is
     // not present. This cope with unavailable plugins (eg. incomptabile ones)
     $usedsauth = $DB->get_records_sql_menu('SELECT DISTINCT auth, COUNT(auth) FROM {user} WHERE deleted=0 GROUP BY auth');

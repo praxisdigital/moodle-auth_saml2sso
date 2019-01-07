@@ -206,21 +206,25 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         // If saml=off, go to default login page regardless any other
         // settings. Useful to administrators to recover from misconfiguration
-        if ($saml == 'off'
-                || (!empty($SESSION->saml) && $SESSION->saml == 'off')) {
+        if ($saml == 'off') {
             $SESSION->saml = 'off';
             return;
         }
 
-        // If dual login is disabled, the user is redirect to the IdP
-        if (!$this->config->dual_login || $saml == 'on') {
+        // If dual login is disabled or saml=on, the user is redirect to the IdP
+        if ($saml == 'on') {
             $SESSION->saml='on';
             $this->saml2_login();
         }
-        else {
-            $SESSION->saml = 'off';
+
+        // Otherwise, is checked the last option in session
+        if (!empty($SESSION->saml) && $SESSION->saml == 'off') {
             return;
         }
+        if ($this->config->dual_login) {
+            return;
+        }
+        $this->saml2_login();
     }
 
     /**
@@ -536,6 +540,12 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         if (empty($this->config->authsource) || !in_array($this->config->authsource, $sourcesnames)) {
             echo $OUTPUT->notification('Invalid authentication source. Available sources: '
                     . implode(', ', $sourcesnames), \core\output\notification::NOTIFY_WARNING);
+            return;
+        }
+
+        $auth = $this->getsspauth();
+        if (empty($auth)) {
+            echo $OUTPUT->notification('SimpleSAMLphp library loading failed!', \core\output\notification::NOTIFY_WARNING);
             return;
         }
 
