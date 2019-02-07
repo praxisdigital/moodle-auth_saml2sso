@@ -448,12 +448,12 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * Returns true if plugin can be manually set.
+     * The plugin can be manually set in csv import.
      *
      * @return bool
      */
     public function can_be_manually_set() {
-        return false;
+        return true;
     }
 
     /**
