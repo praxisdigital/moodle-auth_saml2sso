@@ -120,7 +120,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
         $button_name = 'SAML Login';
 		if (!empty(trim($this->config->button_name))) {
-            $button_name = new moodle_url($this->config->button_name);
+			$button_name = (new moodle_url($this->config->button_name))->out();
         }
 
         return [[
