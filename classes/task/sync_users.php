@@ -23,6 +23,8 @@
  */
 namespace auth_saml2sso\task;
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot.'/auth/saml2sso/locallib.php');
 
 class sync_users extends \core\task\scheduled_task {
@@ -71,7 +73,7 @@ class sync_users extends \core\task\scheduled_task {
         if ($ref->getNumberOfParameters() == 1) {
             $sourceplugin->sync_users($update);
         }
-        elseif ($ref->getNumberOfParameters() == 2) {
+        else if ($ref->getNumberOfParameters() == 2) {
             $sourceplugin->sync_users($trace, $update);
         }
         else {

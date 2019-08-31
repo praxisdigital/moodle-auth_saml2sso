@@ -36,7 +36,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     /**
      * The name of the component. Used by the configuration.
      */
-    const COMPONENT_NAME = \auth_saml2sso\COMPONENT_NAME; //'auth_saml2sso';
+    const COMPONENT_NAME = \auth_saml2sso\COMPONENT_NAME;
     /**
      * Legacy name of the component.
      */
@@ -56,6 +56,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         'authsource' => '',
         'logout_url_redir' => '',
         'edit_profile' => 0,
+        'allow_empty_email' => 0,
         'field_idp_fullname' => 1,
         'field_idp_firstname' => 'cn',
         'field_idp_lastname' => 'cn',
@@ -82,7 +83,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $legacyComponentName = (array) get_config(self::LEGACY_COMPONENT_NAME);
         $this->config = (object) array_merge($this->defaults, $componentName, $legacyComponentName);
         if (empty($this->config->authsource)) {
-            // Uses old entityid key
+            // Uses old entityid key.
             $this->config->authsource = $this->config->entityid;
             debugging('authsource config key empty, using old entityid key', DEBUG_DEVELOPER);
         }
@@ -93,13 +94,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * Load SimpleSAMLphp library autoloader
      */
     private function getsspauth() {
-        require_once $this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
+        require_once($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
 
         if (class_exists('\SimpleSAML\Auth\Simple')) {
             return new \SimpleSAML\Auth\Simple($this->config->authsource);
         }
         // Backward compatibility, will be dropped
-        // since any version < 1.15.3 is insecure
+        // since any version < 1.15.3 is insecure.
         return new SimpleSAML_Auth_Simple($this->config->authsource);
     }
 
@@ -109,14 +110,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * @return array
      * Added by Praxis
      */
-    function loginpage_idp_list($wantsurl) {
+    public function loginpage_idp_list($wantsurl) {
         $url = '?saml=on';
 
         if (!empty($this->config->button_url)) {
             $button_path = new moodle_url($this->config->button_url);
-        }
-        else {
-            $button_path =  new moodle_url('/auth/saml2sso/pix/login-btn.png');
+        } else {
+            $button_path = new moodle_url('/auth/saml2sso/pix/login-btn.png');
         }
         $button_name = 'SAML Login';
         if (!empty($this->config->button_name)) {
@@ -155,7 +155,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      *
      * @return mixed array with no magic quotes or false on error
      */
-    function get_userinfo($username) {
+    public function get_userinfo($username) {
         $auth = $this->getsspauth();
         if (!$auth->isAuthenticated()) {
             return false;
@@ -164,19 +164,19 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $attributes = $auth->getAttributes();
         $uid = trim(core_text::strtolower($attributes[$this->config->idpattr][0]));
         if (core_text::strtolower($username) != $uid) {
-            // Not the current user
+            // Not the current user.
             return false;
         }
 
         $attrmap = $this->get_attribute_mapping($this->config->idpattr);
 
         $result = array();
-        foreach ($attrmap as $key=>$value) {
-            // Check if attribute is present
+        foreach ($attrmap as $key => $value) {
+            // Check if attribute is present.
             if (empty($attributes[$value])) {
                 // If the IdP aggregate different information sources, an attribute
                 // can be missing due to a temporary problem. It is unreasobable
-                // deleting the old value
+                // deleting the old value.
                 if ($this->config->delete_if_empty) {
                     $result[$key] = '';
                 }
@@ -213,11 +213,11 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         // If dual login is disabled or saml=on, the user is redirect to the IdP
         if ($saml == 'on') {
-            $SESSION->saml='on';
+            $SESSION->saml = 'on';
             $this->saml2_login();
         }
 
-        // Otherwise, is checked the last option in session
+        // Otherwise, is checked the last option in session.
         if (!empty($SESSION->saml) && $SESSION->saml == 'off') {
             return;
         }
@@ -237,11 +237,11 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         global $CFG, $USER;
 
         if ($USER->auth != $this->authtype) {
-            // SingleLogOut must not be called for user handled by other plugins
+            // SingleLogOut must not be called for user handled by other plugins.
             return;
         }
 
-        $urllogout = filter_var($this->config->logout_url_redir, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED) ? $this->config->logout_url_redir : $CFG->wwwroot;
+        $urllogout = filter_var($this->config->logout_url_redir, FILTER_VALIDATE_URL) ? $this->config->logout_url_redir : $CFG->wwwroot;
 
         // Check if we need to sign off users from IdP too
         if ((int) $this->config->single_signoff) {
@@ -268,11 +268,9 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $auth->requireAuth();
         $attributes = $auth->getAttributes();
 
-        /**
-         * Email attribute
-         * Here we insure that e-mail returned from identity provider (IdP) is catched
-         * whenever it is email or mail attribute name
-         */
+        // Email attribute
+        // here we insure that e-mail returned from identity provider (IdP) is catched
+        // whenever it is email or mail attribute name.
         if (isset($attributes['email'])) {
             $attributes[$this->mapping->email][0] = core_text::strtolower(trim($attributes['email'][0]));
         } else if (isset($attributes['mail'])) {
@@ -281,28 +279,27 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             $this->error_page(get_string('error_novalidemailfromidp', self::COMPONENT_NAME));
         }
         // if $this->config->allow_empty_email is true and the IdP don't provide an
-        // email address, the user is redirect to the profile page to complete
+        // email address, the user is redirect to the profile page to complete.
 
-        /**
-         * If the field containing the user's name is a unique field, we need to break
-         * into firstname and lastname
-         */
+        // If the field containing the user's name is a unique field, we need to break
+        // into firstname and lastname.
         if ((int) $this->config->field_idp_fullname) {
             // First name attribute
-            $attributes[$this->mapping->firstname][0] = strstr($attributes[$this->config->field_idp_firstname][0], " ", true) ? core_text::strtoupper(trim(strstr($attributes[$this->config->field_idp_firstname][0], " ", true))) : core_text::strtoupper(trim($attributes[$this->config->field_idp_firstname][0]));
+            $attributes[$this->mapping->firstname][0] = strstr($attributes[$this->config->field_idp_firstname][0], " ", true)
+                            ? core_text::strtoupper(trim(strstr($attributes[$this->config->field_idp_firstname][0], " ", true)))
+                            : core_text::strtoupper(trim($attributes[$this->config->field_idp_firstname][0]));
             // Last name attribute
-            $attributes[$this->mapping->lastname][0] = strstr($attributes[$this->config->field_idp_lastname][0], " ") ? core_text::strtoupper(trim(strstr($attributes[$this->config->field_idp_lastname][0], " "))) : core_text::strtoupper(trim($attributes[$this->config->field_idp_lastname][0]));
+            $attributes[$this->mapping->lastname][0] = strstr($attributes[$this->config->field_idp_lastname][0], " ")
+                            ? core_text::strtoupper(trim(strstr($attributes[$this->config->field_idp_lastname][0], " ")))
+                            : core_text::strtoupper(trim($attributes[$this->config->field_idp_lastname][0]));
         } else {
             $attributes[$this->mapping->firstname][0] = trim($attributes[$this->config->field_idp_firstname][0]);
             $attributes[$this->mapping->lastname][0] = trim($attributes[$this->config->field_idp_lastname][0]);
         }
 
-        /**
-         * User Id returned from IdP
-         * Will be used to get user from our Moodle database if exists
-         * create_user_record lowercases the username, so we need to lower it here.
-         * 
-         */
+        // User Id returned from IdP
+        // Will be used to get user from our Moodle database if exists
+        // create_user_record lowercases the username, so we need to lower it here.
         $uid = trim(core_text::strtolower($attributes[$this->config->idpattr][0]));
 
         // Now we check if the key returned from IdP exists in our Moodle database
@@ -483,7 +480,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         if (empty($urltogo)) {
             $urltogo = (new moodle_url('/'))->out();
         }
-        $samlLogout = $auth->getLogoutURL($urltogo);
+        $logouturl = $auth->getLogoutURL($urltogo);
 
         $PAGE->set_course($SITE);
         $PAGE->set_url('/');
@@ -492,7 +489,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         echo $OUTPUT->header();
         echo $OUTPUT->box($msg, 'errorbox alert alert-danger', null, array('data-rel' => 'fatalerror'));
         echo $OUTPUT->box(get_string('error_you_are_still_connected', self::COMPONENT_NAME)
-                . ' <a href="' . $samlLogout . '">'
+                . ' <a href="' . $logouturl . '">'
                 . get_string('label_logout', self::COMPONENT_NAME) . '</a>', 'errorbox alert');
         echo $OUTPUT->footer();
         exit;
@@ -521,7 +518,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             return;
         }
 
-        require $this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
+        require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
         $sspconfig = SimpleSAML_Configuration::getInstance();
         if (version_compare($sspconfig->getVersion(), '1.15.3') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
@@ -529,7 +526,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
         echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
 
-        @include $this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+        @include($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
         if ($config['store.type'] == 'phpsession') {
             echo $OUTPUT->notification('It seems SimpleSAMLphp uses default PHP session storage, it could be troublesome: switch to another store.type in config.php', \core\output\notification::NOTIFY_INFO);
         }
