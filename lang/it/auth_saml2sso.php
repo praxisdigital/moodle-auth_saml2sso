@@ -94,8 +94,13 @@ $string['label_sync_settings_help']   = '
 Un IdP SAML non può fornire un elenco di utenti da sincronizzare, ma può 
 appoggiarsi ad un backend LDAP / DB da cui possono essere letti.
 La configurazione deve quindi essere impostata dal plugin di autenticazione della sorgente';
-$string['label_user_directory']          = 'Origine utenti';
+$string['label_user_directory']          = 'Sorgente utenti';
 $string['help_user_directory']           = 'Un plugin di autenticazione in grado di elencare gli utenti';
+$string['label_do_update']            = 'Aggiorna profili';
+$string['help_do_update']             = 'Aggiorna i campi dei profili degli utenti esistenti
+con i dati della sorgente utenti. Se "no", verranno solo creati localmente i nuovi
+utenti nella sorgente utenti. Se "sì", la sincronizzazione potrebbe sovrascrive
+i valori aggiornati dall\'IdP all\'ultimo login utente';
 $string['label_verbose_sync']        = 'Mostra report';
 $string['help_verbose_sync']         = 'Attiva il report dettagliato';
 

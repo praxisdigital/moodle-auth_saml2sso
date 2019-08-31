@@ -532,12 +532,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
         $sspconfig = SimpleSAML_Configuration::getInstance();
-        if (version_compare($sspconfig->getVersion(), '1.15.3') < 0) {
+        if (version_compare($sspconfig->getVersion(), '1.17.3') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
                     . $sspconfig->getVersion() . ') and insecure, please upgrade it', \core\output\notification::NOTIFY_WARNING);
+        } else {
+            echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
         }
-        echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
-
+        
         @include($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
         if ($config['store.type'] == 'phpsession') {
             echo $OUTPUT->notification('It seems SimpleSAMLphp uses default PHP session storage, it could be troublesome: switch to another store.type in config.php', \core\output\notification::NOTIFY_INFO);
@@ -589,6 +590,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 echo $OUTPUT->notification('A sync process with \'' . get_string('pluginname', 'auth_'.$this->config->user_directory)
                         . '\' auth plugin is enabled. Please check its configuration too.', \core\output\notification::NOTIFY_INFO);
             }
+        }
+
+        if (!$this->config->edit_profile && $this->config->allow_empty_email) {
+            echo $OUTPUT->notification('The plugin accepts SAML assertion with empty '
+                    . 'e-mail address, but the user is not enabled to edit '
+                    . 'his profile to add it by himself. Users without e-mail will be locked out by Moodle.',
+                    \core\output\notification::NOTIFY_WARNING);
         }
 
         if ($this->config->field_idp_fullname) {

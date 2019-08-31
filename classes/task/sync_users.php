@@ -55,7 +55,7 @@ class sync_users extends \core\task\scheduled_task {
         else {
             $trace = new \null_progress_trace();
         }
-        $update = false;
+        $update = !empty($config->do_update);
 
         if (empty($config->user_directory)) {
             mtrace('Auth source not set, synchronisation stopped');
