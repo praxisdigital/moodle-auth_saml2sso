@@ -94,8 +94,12 @@ $string['label_sync_settings_help']   = '
 SAML IdPs cannot provide a user list suitable to users synchronization,
 however they are often backended on a LDAP o DB source able to.
 Configure the plugin for the backend authentication source.';
-$string['label_user_directory']       = 'User directory';
+$string['label_user_directory']       = 'User source';
 $string['help_user_directory']        = 'An auth plugin with listing capability';
+$string['label_do_update']            = 'Update profiles';
+$string['help_do_update']             = 'Profile fields of existing users will be update
+with values from user source. If "no", only new users in user source will be created locally.
+If "yes", user synchronization could overwrite values set at login by the IdP.';
 $string['label_verbose_sync']        = 'Show details';
 $string['help_verbose_sync']         = 'Enable verbose report';
 
