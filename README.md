@@ -14,7 +14,7 @@ There are other SAML plugins for Moodle and the panorama could be confusing.
 Below are the main differences between this plugin, named internally as **auth_saml2sso**, and the others:
 
 * [official Shibboleth plugin](https://docs.moodle.org/35/en/Shibboleth) - Requires a system-level configuration, uses a long-running process, easily protects resource at Apache level, cannot exploit PHP skill, hard to configure for servers hosting multiple Moodle if requirements of each site are different.
-* [SAML Authentication (auth_saml)](https://moodle.org/plugins/auth_saml) - There's no compatible version with Moodle 3.0+. The code is obsolete and the plugin go beyond the purpose of a authentication plugin, mixing auth and enrol rules.
+* [SAML Authentication (auth_saml)](https://moodle.org/plugins/auth_saml) - There is a new release of this plugin since mid of 2019. Handles enrollment based on attribute passed by the IdP.
 * [SAML2 Single sign on (auth_saml2)](https://moodle.org/plugins/auth_saml2) - It's a complete solution for those that don't have a working SP installation, but, because it generate its own SP, for every single instance of Moodle that you install, you must exchange the metadata with the owner of the IdP. In a environment that there are more than one IdP, this is unpractical.
 * [OneLogin SAML SSO (onelogin_saml)](https://github.com/onelogin/moodle-saml) - Based on OneLogin libraries, features similar to auth_saml2
 
