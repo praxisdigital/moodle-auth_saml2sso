@@ -92,16 +92,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
     /**
      * Load SimpleSAMLphp library autoloader
+     * 
+     * @since 3.6.0 Dropped support for non namespaced functions
      */
     private function getsspauth() {
         require_once($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
 
-        if (class_exists('\SimpleSAML\Auth\Simple')) {
-            return new \SimpleSAML\Auth\Simple($this->config->authsource);
-        }
-        // Backward compatibility, will be dropped
-        // since any version < 1.15.3 is insecure.
-        return new SimpleSAML_Auth_Simple($this->config->authsource);
+        return new \SimpleSAML\Auth\Simple($this->config->authsource);
     }
 
     /**
@@ -517,24 +514,29 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // NOTE: this is not localised intentionally, admins are supposed to understand English at least a bit...
 
         if (empty($this->config->sp_path)) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib path not set', \core\output\notification::NOTIFY_WARNING);
+            echo $OUTPUT->notification('SimpleSAMLphp lib path not set', \core\output\notification::NOTIFY_ERROR);
             return;
         }
         if (!empty(getenv('SIMPLESAMLPHP_CONFIG_DIR')) && $this->config->sp_path != dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR'))) {
             echo $OUTPUT->notification('SimpleSAMLphp lib path differs from the environment default ('
                     . dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR'))
-                    . '): it could be fine, but check if the library has been updated', \core\output\notification::NOTIFY_INFO);
+                    . '): it could be fine, but check if the library has been updated', \core\output\notification::NOTIFY_WARNING);
         }
         if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php') || !file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php')) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib path seems to be invalid', \core\output\notification::NOTIFY_WARNING);
+            echo $OUTPUT->notification('SimpleSAMLphp lib path seems to be invalid', \core\output\notification::NOTIFY_ERROR);
             return;
         }
 
         require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
-        $sspconfig = SimpleSAML_Configuration::getInstance();
-        if (version_compare($sspconfig->getVersion(), '1.17.3') < 0) {
+        $sspconfig = \SimpleSAML\Configuration::getInstance();
+        if (version_compare($sspconfig->getVersion(), '1.17.8') < 0) {
+            echo $OUTPUT->notification('SimpleSAMLphp lib is too old ('
+                    . $sspconfig->getVersion() . ') and insecure, please upgrade it', \core\output\notification::NOTIFY_ERROR);
+            return;
+        }
+        if (version_compare($sspconfig->getVersion(), '1.18.6') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
-                    . $sspconfig->getVersion() . ') and insecure, please upgrade it', \core\output\notification::NOTIFY_WARNING);
+                    . $sspconfig->getVersion() . ') and insecure, consider to upgrade it', \core\output\notification::NOTIFY_WARNING);
         } else {
             echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
         }
@@ -546,7 +548,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         $sourcesnames = array_map(function($source){
             return $source->getAuthId();
-        }, \SimpleSAML_Auth_Source::getSourcesOfType('saml:SP'));
+        }, \SimpleSAML\Auth\Source::getSourcesOfType('saml:SP'));
         if (empty($this->config->authsource) || !in_array($this->config->authsource, $sourcesnames)) {
             echo $OUTPUT->notification('Invalid authentication source. Available sources: '
                     . implode(', ', $sourcesnames), \core\output\notification::NOTIFY_WARNING);
