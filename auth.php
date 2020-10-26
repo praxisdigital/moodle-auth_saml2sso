@@ -92,16 +92,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
     /**
      * Load SimpleSAMLphp library autoloader
+     * 
+     * @since 3.6.0 Dropped support for non namespaced functions
      */
     private function getsspauth() {
         require_once($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
 
-        if (class_exists('\SimpleSAML\Auth\Simple')) {
-            return new \SimpleSAML\Auth\Simple($this->config->authsource);
-        }
-        // Backward compatibility, will be dropped
-        // since any version < 1.15.3 is insecure.
-        return new SimpleSAML_Auth_Simple($this->config->authsource);
+        return new \SimpleSAML\Auth\Simple($this->config->authsource);
     }
 
     /**
@@ -268,7 +265,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * Do all the magic during login procedure
+     * Do all the magic during SSO login procedure
      * @global type $DB
      * @global type $USER
      * @global type $CFG
@@ -277,7 +274,46 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         global $DB, $USER, $CFG;
 
         $auth = $this->getsspauth();
-        $auth->requireAuth();
+        $param = ['KeepPost' => true];
+        
+        // Admins can have multiple sessions.
+        $apply_session_control = !is_siteadmin($USER->id)
+                && $this->config->session_control
+                && $CFG->limitconcurrentlogins == 1;
+        if ($apply_session_control) {
+            // Force a reauthentication even if a SSO session is active in the SP.
+            // Throw away the POST values because after reauthentication user must
+            // fill the form again: session control is used in exams or similar
+            // situation, if we keep the POST data, cheating is still possible.
+            $param = ['ForceAuthn' => true, 'KeepPost' => false];
+        }
+        // Retrieve the Moodle session ID from the local SSO session data
+        $sspsession = \SimpleSAML\Session::getSessionFromRequest();
+        $prevmoodlesession = $sspsession->getData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+            'moodle:session'
+        );
+
+        // Moodle session changed within the same local SSO session.
+        if (!empty($prevmoodlesession) && $prevmoodlesession != session_id()) {
+            if ($apply_session_control) {
+                $event = \auth_saml2sso\event\user_kicked_off::create(array());
+                $event->trigger();
+            }
+            $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+                'moodle:session'
+            );
+            $auth->login($param);
+        }
+        else {
+            $auth->requireAuth($param);
+        }
+
+        // Save the Moodle session ID in the local SSO session data.
+        $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+            'moodle:session',
+            session_id()
+        );
+            
         $attributes = $auth->getAttributes();
 
         // Email attribute
@@ -356,7 +392,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * Do login will set session and cookie to authenticated user
+     * Do Moodle login will set session and cookie to authenticated user
      * @global type $USER
      * @global type $CFG
      * @param type $urltogo
@@ -369,6 +405,18 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $USER->site = $CFG->wwwroot;
         set_moodle_cookie($USER->username);
 
+        $apply_session_control = !is_siteadmin($USER->id)
+                && $this->config->session_control
+                && $CFG->limitconcurrentlogins == 1;
+        if ($apply_session_control) {
+            // https://tracker.moodle.org/browse/MDL-62753?jql=text%20~%20%22session%20kill%22
+            // moodle\auth\shibboleth\classes\helper.php
+
+            // Honour limit Concurrent Logins.
+            // https://moodle.org/mod/forum/discuss.php?d=387784
+            \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
+        }
+        
         // If we are not on the page we want, then redirect to it.
         if (qualified_me() !== $urltogo) {
             redirect($urltogo);
@@ -517,24 +565,24 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // NOTE: this is not localised intentionally, admins are supposed to understand English at least a bit...
 
         if (empty($this->config->sp_path)) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib path not set', \core\output\notification::NOTIFY_WARNING);
+            echo $OUTPUT->notification('SimpleSAMLphp lib path not set', \core\output\notification::NOTIFY_ERROR);
             return;
         }
         if (!empty(getenv('SIMPLESAMLPHP_CONFIG_DIR')) && $this->config->sp_path != dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR'))) {
             echo $OUTPUT->notification('SimpleSAMLphp lib path differs from the environment default ('
                     . dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR'))
-                    . '): it could be fine, but check if the library has been updated', \core\output\notification::NOTIFY_INFO);
+                    . '): it could be fine, but check if the library has been updated', \core\output\notification::NOTIFY_WARNING);
         }
         if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php') || !file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php')) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib path seems to be invalid', \core\output\notification::NOTIFY_WARNING);
+            echo $OUTPUT->notification('SimpleSAMLphp lib path seems to be invalid', \core\output\notification::NOTIFY_ERROR);
             return;
         }
 
         require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
-        $sspconfig = SimpleSAML_Configuration::getInstance();
-        if (version_compare($sspconfig->getVersion(), '1.17.3') < 0) {
+        $sspconfig = \SimpleSAML\Configuration::getInstance();
+        if (version_compare($sspconfig->getVersion(), '1.18.6') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
-                    . $sspconfig->getVersion() . ') and insecure, please upgrade it', \core\output\notification::NOTIFY_WARNING);
+                    . $sspconfig->getVersion() . ') and insecure, consider to upgrade it', \core\output\notification::NOTIFY_WARNING);
         } else {
             echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
         }
@@ -546,7 +594,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         $sourcesnames = array_map(function($source){
             return $source->getAuthId();
-        }, \SimpleSAML_Auth_Source::getSourcesOfType('saml:SP'));
+        }, \SimpleSAML\Auth\Source::getSourcesOfType('saml:SP'));
         if (empty($this->config->authsource) || !in_array($this->config->authsource, $sourcesnames)) {
             echo $OUTPUT->notification('Invalid authentication source. Available sources: '
                     . implode(', ', $sourcesnames), \core\output\notification::NOTIFY_WARNING);

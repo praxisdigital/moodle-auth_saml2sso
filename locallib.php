@@ -63,7 +63,7 @@ function get_known_plugin($knownauthplugins = LOCAL_AUTH_PLUGINS) {
     $usedsauth = $DB->get_records_sql_menu('SELECT DISTINCT auth, COUNT(auth) FROM {user} WHERE deleted=0 GROUP BY auth');
     foreach ($usedsauth as $auth => $count) {
         if ($auth == AUTH_NAME) {
-            // Skip himself
+            // Skip itself.
             continue;
         }
 
@@ -73,13 +73,11 @@ function get_known_plugin($knownauthplugins = LOCAL_AUTH_PLUGINS) {
 
         if (empty($authsavailable[$auth])) {
             $fields[$auth] = ['auth' => null, 'count' => $count];
-                    //'Unknown plugin "' . $auth . '" (' . get_string('ajaxxusersfound', 'enrol', $count) . ')';
             continue;
         }
 
         $authplugin = \get_auth_plugin($auth);
         $fields[$auth] = ['auth' => $authplugin->get_title(), 'count' => $count];
-                //$authplugin->get_title() . ' (' . get_string('ajaxxusersfound', 'enrol', $count) . ')';
     }
 
     return $fields;
@@ -96,7 +94,7 @@ function takeover($auth) {
     
     $known_plugins = get_known_plugin();
     if (empty($known_plugins[$auth])) {
-        // Could not migrate
+        // Could not migrate.
         debugging('user belongin to ' . $auth . ' cannot migrate', DEBUG_NORMAL);
         return false;
     }
@@ -109,6 +107,10 @@ function takeover($auth) {
 
     $count = 0;
     foreach ($users as $userid => $user) {
+        if (!\core_user::is_real_user($userid)) {
+            // Admin.
+            continue;
+        }
         $user->auth = AUTH_NAME;
         user_update_user($user, false, false);
         $event = \auth_saml2sso\event\user_migrated::create(array(

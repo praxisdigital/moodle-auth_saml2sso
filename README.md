@@ -28,19 +28,32 @@ The key for this plugin is that you can use your exists Service Provider (SP) wi
 * Username mapping - Which attribute from IdP should be used for username
 * Username checking - Where to check if the username exists
 * Auto create users - Allow create new users
+* **new** Limit concurrent logins to 1 if configured as global setting
 * SP source name - Generally default-sp in SimpleSAMLphp
 * Logout URL to redirect users after logout
 * User synchronization source (see below)
 * Allow users to edit or not the profile
-* ~~Ability to break the full name from IdP into firstname and lastname~~ *deprecated, see below*
+* ~~Ability to break the full name from IdP into firstname and lastname~~ *deprecated, this is the last release supporting it: see below*
 
 To override the authentication and login directly in Moodle (ex.: using admin account), add the `saml=off` parameter in the URL (ex.: https://my.moodle/login/index.php?saml=off)
 
-## Split the full name from IdP
+## Limit concurrent logins
+According Moodle documentation, SSO-auth modules don't apply "limit concurrent logins" restriction.
 
+https://tracker.moodle.org/browse/MDL-62753?jql=text%20~%20%22session%20kill%22
+
+https://moodle.org/mod/forum/discuss.php?d=387784
+
+Probably this is due to the mismatch between the Moodle session and the local SSO session.
+
+Since SimpleSAMLphp API can interact with the local SSO session, this plugin supports the concurrent logins limit if it is set to 1.
+This is a common scenario for exams, while limits > 1 have not clear purposes.
+
+## Split the full name from IdP
 One of the distinctive feature of the first release of SAML2 SSO plugin was the ability to
 break the full name from IdP into the first name and the last name.
-It was related to the old version of Moodle auth base plugin.
+It was related to the old version of Moodle auth base plugin and this feature will be removed in the next release.
+
 Nowadays, adminting there are some IdPs still serving the full name and not 
 the first and last name (such as givenName and sn in LDAP idiom) you can use a
 SimpleSAMLphp *authproc*.
