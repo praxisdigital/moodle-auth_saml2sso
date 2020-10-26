@@ -399,6 +399,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      */
     protected function do_login($user, $urltogo) {
         global $USER, $CFG;
+global $SESSION, $DB;
 
         $USER = complete_user_login($user);
         $USER->loggedin = true;
