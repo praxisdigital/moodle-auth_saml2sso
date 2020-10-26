@@ -134,6 +134,16 @@ if ($ADMIN->fulltree) {
         )
     );
     
+    $field_setting = 'session_control';
+    $settings->add(new admin_setting_configselect(
+            'auth_saml2sso/' . $field_setting, 
+            new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
+            new lang_string('help_' . $field_setting, 'auth_saml2sso'), 
+            0, 
+            $yesno
+        )
+    );
+    
     // Dual login settings
     $settings->add(new admin_setting_heading('auth_saml2sso/dual_login_settings',
             new lang_string('label_dual_login_settings', 'auth_saml2sso'),

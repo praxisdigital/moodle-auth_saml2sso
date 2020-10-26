@@ -45,6 +45,7 @@ $string['label_field_idp_fullname']                 = 'Nome completo dall\'IdP?'
 $string['label_instructions_title']                 = 'Istruzioni';
 $string['label_instructions_p1']                    = '<p>La mappatura è richiesta per i campi:</p><ul><li>Nome => givenName</li><li>Cognome => surname</li><li>Indirizzo email => email</li></ul><p>Puoi cambiarla dall\'array <code>$stringMapping</code> in <code>auth.php</code></p>';
 $string['label_allow_empty_email']                  = 'Accetta email nulle';
+$string['label_session_control']                    = 'Applica limite di sessioni';
 
 //_help config strings
 $string['help_allow_empty_email']                   = 'Permette all\'IdP/ADFS di non fornire il valore Email o Mail. All\'utente verrà richiesto di completare il profilo';
@@ -64,6 +65,9 @@ $string['help_edit_profile']                        = 'Se gli utenti non possono
 $string['help_field_idp_firstname']                 = '<strong>deprecato, usare una authproc</strong> Attributo ricevuto dall\'IdP contenente il nome' ;
 $string['help_field_idp_lastname']                  = '<strong>deprecato, usare una authproc</strong> Attributo ricevuto dall\'IdP contenente il cognome';
 $string['help_field_idp_fullname']                  = '<strong>deprecato, usare una authproc</strong> Il nome completo è restituito dall\'IdP in un campo unico (es. cn)? Se sì, indicarlo sotto in entrambi gli attributi per il nome e il cognome';
+$string['help_session_control']                     = 'Se l\'opzione  \'' 
+                                                    . (new lang_string('limitconcurrentlogins', 'core_auth'))->out('it')
+                                                    . '\' è impostato a 1, viene rispettata per gli utenti non amministratori.';
 
 //error config strings
 $string['error_create_user']                        = 'Errore nella creazione del profilo Moodle. Contattare l\'amministratore.';
@@ -133,5 +137,7 @@ $string['event_user_migrate']       = 'Utente importato';
 $string['event_user_migrate_desc']  = 'L\'utente è stato convertito per usare ' . $string['pluginname'];
 $string['event_not_searchable']         = 'Utente SSO non identificabile';
 $string['event_not_searchable_desc']    = 'L\'IdP non ha fornito l\'attributo richiesto per cercare l\'utente';
+$string['event_user_kicked_off']        = 'Annullate vecchie sessioni';
+$string['event_user_kicked_off_desc']   = 'L\'utente ha attivato una nuova sessione Moodle mentre il limite di autenticazioni contemporanee era attivo: le sessioni vecchie sono state eliminate e i dati non salvati ignorati';
 
 $string['privacy:metadata'] = 'Il plugin di autenticazione SAML2 SSO non registra alcun dato personale.';
