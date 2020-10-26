@@ -265,7 +265,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * Do all the magic during login procedure
+     * Do all the magic during SSO login procedure
      * @global type $DB
      * @global type $USER
      * @global type $CFG
@@ -274,7 +274,46 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         global $DB, $USER, $CFG;
 
         $auth = $this->getsspauth();
-        $auth->requireAuth();
+        $param = ['KeepPost' => true];
+        
+        // Admins can have multiple sessions.
+        $apply_session_control = !is_siteadmin($USER->id)
+                && $this->config->session_control
+                && $CFG->limitconcurrentlogins == 1;
+        if ($apply_session_control) {
+            // Force a reauthentication even if a SSO session is active in the SP.
+            // Throw away the POST values because after reauthentication user must
+            // fill the form again: session control is used in exams or similar
+            // situation, if we keep the POST data, cheating is still possible.
+            $param = ['ForceAuthn' => true, 'KeepPost' => false];
+        }
+        // Retrieve the Moodle session ID from the local SSO session data
+        $sspsession = \SimpleSAML\Session::getSessionFromRequest();
+        $prevmoodlesession = $sspsession->getData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+            'moodle:session'
+        );
+
+        // Moodle session changed within the same local SSO session.
+        if (!empty($prevmoodlesession) && $prevmoodlesession != session_id()) {
+            if ($apply_session_control) {
+                $event = \auth_saml2sso\event\user_kicked_off::create(array());
+                $event->trigger();
+            }
+            $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+                'moodle:session'
+            );
+            $auth->login($param);
+        }
+        else {
+            $auth->requireAuth($param);
+        }
+
+        // Save the Moodle session ID in the local SSO session data.
+        $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+            'moodle:session',
+            session_id()
+        );
+            
         $attributes = $auth->getAttributes();
 
         // Email attribute
@@ -353,19 +392,32 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * Do login will set session and cookie to authenticated user
+     * Do Moodle login will set session and cookie to authenticated user
      * @global type $USER
      * @global type $CFG
      * @param type $urltogo
      */
     protected function do_login($user, $urltogo) {
         global $USER, $CFG;
+global $SESSION, $DB;
 
         $USER = complete_user_login($user);
         $USER->loggedin = true;
         $USER->site = $CFG->wwwroot;
         set_moodle_cookie($USER->username);
 
+        $apply_session_control = !is_siteadmin($USER->id)
+                && $this->config->session_control
+                && $CFG->limitconcurrentlogins == 1;
+        if ($apply_session_control) {
+            // https://tracker.moodle.org/browse/MDL-62753?jql=text%20~%20%22session%20kill%22
+            // moodle\auth\shibboleth\classes\helper.php
+
+            // Honour limit Concurrent Logins.
+            // https://moodle.org/mod/forum/discuss.php?d=387784
+            \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
+        }
+        
         // If we are not on the page we want, then redirect to it.
         if (qualified_me() !== $urltogo) {
             redirect($urltogo);
