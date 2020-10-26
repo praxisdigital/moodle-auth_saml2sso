@@ -38,10 +38,14 @@ The key for this plugin is that you can use your exists Service Provider (SP) wi
 To override the authentication and login directly in Moodle (ex.: using admin account), add the `saml=off` parameter in the URL (ex.: https://my.moodle/login/index.php?saml=off)
 
 ## Limit concurrent logins
-According Moodle documentation, SSO-auth modules don't apply "limit concurrent logins" restriction. 
+According Moodle documentation, SSO-auth modules don't apply "limit concurrent logins" restriction.
+
 https://tracker.moodle.org/browse/MDL-62753?jql=text%20~%20%22session%20kill%22
+
 https://moodle.org/mod/forum/discuss.php?d=387784
+
 Probably this is due to the mismatch between the Moodle session and the local SSO session.
+
 Since SimpleSAMLphp API can interact with the local SSO session, this plugin supports the concurrent logins limit if it is set to 1.
 This is a common scenario for exams, while limits > 1 have not clear purposes.
 
