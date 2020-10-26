@@ -399,7 +399,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      */
     protected function do_login($user, $urltogo) {
         global $USER, $CFG;
-global $SESSION, $DB;
 
         $USER = complete_user_login($user);
         $USER->loggedin = true;
@@ -581,11 +580,6 @@ global $SESSION, $DB;
 
         require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
         $sspconfig = \SimpleSAML\Configuration::getInstance();
-        if (version_compare($sspconfig->getVersion(), '1.17.8') < 0) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib is too old ('
-                    . $sspconfig->getVersion() . ') and insecure, please upgrade it', \core\output\notification::NOTIFY_ERROR);
-            return;
-        }
         if (version_compare($sspconfig->getVersion(), '1.18.6') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
                     . $sspconfig->getVersion() . ') and insecure, consider to upgrade it', \core\output\notification::NOTIFY_WARNING);
