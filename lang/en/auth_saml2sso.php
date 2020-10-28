@@ -45,7 +45,7 @@ $string['label_field_idp_fullname']                 = 'Full name from Identity P
 $string['label_instructions_title']                 = 'Instructions';
 $string['label_instructions_p1']                    = '<p>You must fill the following Data mapping fields as:</p><ul><li>Firstname => givenName</li><li>Surname => surname</li><li>Email address: => email</li></ul><p>You can change this in <code>$stringmapping</code> array in <code>auth.php</code></p>';
 $string['label_allow_empty_email']                  = 'Allow empty email';
-$string['label_session_control']                    = 'Apply session limit';
+$string['label_session_control']                    = (new lang_string('limitconcurrentlogins', 'core_auth'))->out('en');
 
 //_help config strings
 $string['help_allow_empty_email']                   = 'Allow the IdP/ADFS don\'t return Email or Mail value. User will be prompted to complete the profile.';
@@ -65,9 +65,9 @@ $string['help_edit_profile']                        = 'If users cannot edit prof
 $string['help_field_idp_firstname']                 = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user first name' ;
 $string['help_field_idp_lastname']                  = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user last name';
 $string['help_field_idp_fullname']                  = '<strong>deprecated, use an authproc</strong> Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
-$string['help_session_control']                     = 'If the global setting \'' 
+$string['help_session_control']                     = 'Apply the global setting \'' 
                                                     . (new lang_string('limitconcurrentlogins', 'core_auth'))->out('en')
-                                                    . '\' is 1, honours the restriction for non-admin users.';
+                                                    . '\' if it is equal to 1, except for admin users.';
 
 //error config strings
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';
