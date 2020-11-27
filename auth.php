@@ -115,9 +115,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         } else {
             $button_path = new moodle_url('/auth/saml2sso/pix/login-btn.png');
         }
+
         $button_name = 'SAML Login';
         if (!empty(trim($this->config->button_name))) {
-                $button_name = (new moodle_url($this->config->button_name))->out();
+            $button_name = (new moodle_url($this->config->button_name))->out();
+        }
+
+        if ($this->config->show_button_name === '0') {
+            $button_name = '';
         }
 
         return [[
