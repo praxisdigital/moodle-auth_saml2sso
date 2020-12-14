@@ -78,6 +78,10 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * Constructor
      */
     public function __construct() {
+        global $PAGE;
+
+        $PAGE->requires->css('/auth/saml2sso/style/style.css');
+
         $this->authtype = \auth_saml2sso\AUTH_NAME;
         $componentName = (array) get_config(self::COMPONENT_NAME);
         $legacyComponentName = (array) get_config(self::LEGACY_COMPONENT_NAME);
@@ -113,9 +117,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * Added by Praxis
      */
     public function loginpage_idp_list($wantsurl) {
-        global $PAGE;
-
-        $PAGE->requires->css('/auth/saml2sso/style/style.css');
         $url = '?saml=on';
 
         if (!empty($this->config->button_url)) {

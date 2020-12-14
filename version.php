@@ -28,4 +28,4 @@ $plugin->version = 2020121400;              // The current plugin version (Date:
 $plugin->requires = 2020061500;             // Requires this Moodle version
 $plugin->component = 'auth_saml2sso';       // Full name of the plugin (used for diagnostics)
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '3.9.1';
+$plugin->release = '3.9.2';
