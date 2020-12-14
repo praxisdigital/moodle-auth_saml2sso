@@ -97,7 +97,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
     /**
      * Load SimpleSAMLphp library autoloader
-     * 
+     *
      * @since 3.6.0 Dropped support for non namespaced functions
      */
     private function getsspauth() {
@@ -113,6 +113,9 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * Added by Praxis
      */
     public function loginpage_idp_list($wantsurl) {
+        global $PAGE;
+
+        $PAGE->requires->css('/auth/saml2sso/style/style.css');
         $url = '?saml=on';
 
         if (!empty($this->config->button_url)) {
@@ -285,7 +288,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         $auth = $this->getsspauth();
         $param = ['KeepPost' => true];
-        
+
         // Admins can have multiple sessions.
         $apply_session_control = !is_siteadmin($USER->id)
                 && $this->config->session_control
@@ -299,7 +302,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
         // Retrieve the Moodle session ID from the local SSO session data
         $sspsession = \SimpleSAML\Session::getSessionFromRequest();
-        $prevmoodlesession = $sspsession->getData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+        $prevmoodlesession = $sspsession->getData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME,
             'moodle:session'
         );
 
@@ -309,7 +312,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 $event = \auth_saml2sso\event\user_kicked_off::create(array());
                 $event->trigger();
             }
-            $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+            $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME,
                 'moodle:session'
             );
             $auth->login($param);
@@ -319,11 +322,11 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
 
         // Save the Moodle session ID in the local SSO session data.
-        $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+        $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME,
             'moodle:session',
             session_id()
         );
-            
+
         $attributes = $auth->getAttributes();
 
         // Email attribute
@@ -436,7 +439,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             // https://moodle.org/mod/forum/discuss.php?d=387784
             \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
         }
-        
+
         // If we are not on the page we want, then redirect to it.
         if (qualified_me() !== $urltogo) {
             redirect($urltogo);
@@ -479,7 +482,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * 
+     *
      * @return boolean
      */
     public function prevent_local_passwords() {
@@ -606,7 +609,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         } else {
             echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
         }
-        
+
         @include($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
         if ($config['store.type'] == 'phpsession') {
             echo $OUTPUT->notification('It seems SimpleSAMLphp uses default PHP session storage, it could be troublesome: switch to another store.type in config.php', \core\output\notification::NOTIFY_INFO);
