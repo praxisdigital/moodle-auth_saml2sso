@@ -15,7 +15,7 @@ const AUTH_NAME = 'saml2sso';
 const COMPONENT_NAME = 'auth_' . AUTH_NAME;
 
 // Known auth mechanisms based on Moodle internal
-// Only auth mechanism in which the username is handle from a central "istitutional"
+// Only auth mechanism in which the username is handle from a central "istitutional" 
 // backend can be converted to SSO
 const LOCAL_AUTH_PLUGINS = [
     'cas' => false,
@@ -52,6 +52,10 @@ function can_sync_user($plugin) {
 }
 
 function get_known_plugin($knownauthplugins = LOCAL_AUTH_PLUGINS) {
+    global $DB;
+
+    $authsavailable = \core_component::get_plugin_list('auth');
+
     $fields = [];
 
     // Check for authsources assigned in user table, even if the plugin is
@@ -87,7 +91,7 @@ function get_known_plugin($knownauthplugins = LOCAL_AUTH_PLUGINS) {
  */
 function takeover($auth) {
     global $DB;
-
+    
     $known_plugins = get_known_plugin();
     if (empty($known_plugins[$auth])) {
         // Could not migrate.
