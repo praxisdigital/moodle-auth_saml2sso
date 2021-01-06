@@ -83,8 +83,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $legacyComponentName = (array) get_config(self::LEGACY_COMPONENT_NAME);
         $this->config = (object) array_merge($this->defaults, $componentName, $legacyComponentName);
         if (empty($this->config->authsource)) {
-            // Uses old entityid key.
-            $this->config->authsource = $this->config->entityid;
+            // Check if entity id isset to avoid notices and show debugging message
+            if (isset($this->config->entityid)) {
+                // Uses old entityid key
+                $this->config->authsource = $this->config->entityid;
+            } else {
+                debugging('Entityid not set, might be caused by missing simpleSAMLphp.', DEBUG_DEVELOPER);
+            }
             debugging('authsource config key empty, using old entityid key', DEBUG_DEVELOPER);
         }
         $this->mapping = (object) self::$stringmapping;
@@ -92,7 +97,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
     /**
      * Load SimpleSAMLphp library autoloader
-     * 
+     *
      * @since 3.6.0 Dropped support for non namespaced functions
      */
     private function getsspauth() {
@@ -115,9 +120,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         } else {
             $button_path = new moodle_url('/auth/saml2sso/pix/login-btn.png');
         }
+
         $button_name = 'SAML Login';
         if (!empty(trim($this->config->button_name))) {
-                $button_name = (new moodle_url($this->config->button_name))->out();
+            $button_name = (new moodle_url($this->config->button_name))->out();
+        }
+
+        if ($this->config->show_button_name === '0') {
+            $button_name = '';
         }
 
         return [[
@@ -275,7 +285,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         $auth = $this->getsspauth();
         $param = ['KeepPost' => true];
-        
+
         // Admins can have multiple sessions.
         $apply_session_control = !is_siteadmin($USER->id)
                 && $this->config->session_control
@@ -289,7 +299,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
         // Retrieve the Moodle session ID from the local SSO session data
         $sspsession = \SimpleSAML\Session::getSessionFromRequest();
-        $prevmoodlesession = $sspsession->getData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+        $prevmoodlesession = $sspsession->getData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME,
             'moodle:session'
         );
 
@@ -299,7 +309,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 $event = \auth_saml2sso\event\user_kicked_off::create(array());
                 $event->trigger();
             }
-            $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+            $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME,
                 'moodle:session'
             );
             $auth->login($param);
@@ -309,11 +319,11 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
 
         // Save the Moodle session ID in the local SSO session data.
-        $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
+        $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME,
             'moodle:session',
             session_id()
         );
-            
+
         $attributes = $auth->getAttributes();
 
         // Email attribute
@@ -341,8 +351,18 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                             ? core_text::strtoupper(trim(strstr($attributes[$this->config->field_idp_lastname][0], " ")))
                             : core_text::strtoupper(trim($attributes[$this->config->field_idp_lastname][0]));
         } else {
-            $attributes[$this->mapping->firstname][0] = trim($attributes[$this->config->field_idp_firstname][0]);
-            $attributes[$this->mapping->lastname][0] = trim($attributes[$this->config->field_idp_lastname][0]);
+
+            // Setting default to empty string to avoid notices being thrown
+            $attributes[$this->mapping->firstname][0] = '';
+            $attributes[$this->mapping->lastname][0] = '';
+
+            if (isset($attributes[$this->config->field_idp_firstname][0])) {
+                $attributes[$this->mapping->firstname][0] = trim($attributes[$this->config->field_idp_firstname][0]);
+            }
+
+            if (isset($attributes[$this->config->field_idp_lastname][0])) {
+                $attributes[$this->mapping->lastname][0] = trim($attributes[$this->config->field_idp_lastname][0]);
+            }
         }
 
         // User Id returned from IdP
@@ -416,7 +436,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             // https://moodle.org/mod/forum/discuss.php?d=387784
             \core\session\manager::apply_concurrent_login_limit($user->id, session_id());
         }
-        
+
         // If we are not on the page we want, then redirect to it.
         if (qualified_me() !== $urltogo) {
             redirect($urltogo);
@@ -459,7 +479,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * 
+     *
      * @return boolean
      */
     public function prevent_local_passwords() {
@@ -586,7 +606,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         } else {
             echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
         }
-        
+
         @include($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
         if ($config['store.type'] == 'phpsession') {
             echo $OUTPUT->notification('It seems SimpleSAMLphp uses default PHP session storage, it could be troublesome: switch to another store.type in config.php', \core\output\notification::NOTIFY_INFO);
