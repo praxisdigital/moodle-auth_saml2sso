@@ -29,6 +29,7 @@ $string['settings_saml2sso']                        = '';
 //label config strings
 $string['label_button_url']                         = 'URL icona';
 $string['label_button_name']                        = 'Etichetta bottone';
+$string['label_show_button_name']                   = 'Mostra etichetta del bottone';
 $string['label_sp_path']                            = 'Percorso librerie SimpleSAMLphp';
 $string['label_dual_login']                         = 'Dual login';
 $string['label_single_signoff']                     = 'Single Sign Off';
@@ -50,6 +51,7 @@ $string['label_session_control']                    = (new lang_string('limitcon
 //_help config strings
 $string['help_allow_empty_email']                   = 'Permette all\'IdP/ADFS di non fornire il valore Email o Mail. All\'utente verrà richiesto di completare il profilo';
 $string['help_button_url']                          = 'URL dell\'icona da usare sul bottone di login. Massimo 50 pixel di altezza';
+$string['help_show_button_name']                    = 'Mostra l\'etichetta del bottone o solo l\'icona.';
 $string['help_button_name']                         = 'Etichetta per il bottone di login';
 $string['help_sp_path']                             = 'Percorso assoluto dell\'installazione di SSP. Es.: /var/www/simplesamlphp/';
 $string['help_dual_login']                          = 'Mostra all\'utente la maschera di login di Moodle';
