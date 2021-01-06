@@ -360,13 +360,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $criteria = array($this->config->moodle_mapping => $attributes[$this->config->moodle_mapping]);
         $isuser = $DB->get_record('user', $criteria);
 
-        $newuser = false;
-        if (!$isuser) {
+        if ($isuser) {
+            core_user::require_active_user($isuser, true, true);
+        }
+        else {
             // Verify if user can be created
             if ((int) $this->config->autocreate) {
                 // Insert new user
                 $isuser = create_user_record($uid, '', $this->authtype);
-                $newuser = true;
             } else {
                 //If autocreate is not allowed, show error
                 $this->error_page(get_string('nouser', self::COMPONENT_NAME) . $uid);
