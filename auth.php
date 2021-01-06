@@ -57,9 +57,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         'logout_url_redir' => '',
         'edit_profile' => 0,
         'allow_empty_email' => 0,
-        'field_idp_fullname' => 1,
-        'field_idp_firstname' => 'cn',
-        'field_idp_lastname' => 'cn',
         'delete_if_empty' => false,  // Delete the profile field value if the correspondig attribute is missing/empty
     );
 
@@ -82,16 +79,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         $componentName = (array) get_config(self::COMPONENT_NAME);
         $legacyComponentName = (array) get_config(self::LEGACY_COMPONENT_NAME);
         $this->config = (object) array_merge($this->defaults, $componentName, $legacyComponentName);
-        if (empty($this->config->authsource)) {
-            // Check if entity id isset to avoid notices and show debugging message
-            if (isset($this->config->entityid)) {
-                // Uses old entityid key
-                $this->config->authsource = $this->config->entityid;
-            } else {
-                debugging('Entityid not set, might be caused by missing simpleSAMLphp.', DEBUG_DEVELOPER);
-            }
-            debugging('authsource config key empty, using old entityid key', DEBUG_DEVELOPER);
-        }
         $this->mapping = (object) self::$stringmapping;
     }
 
@@ -338,32 +325,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
         // if $this->config->allow_empty_email is true and the IdP don't provide an
         // email address, the user is redirect to the profile page to complete.
-
-        // If the field containing the user's name is a unique field, we need to break
-        // into firstname and lastname.
-        if ((int) $this->config->field_idp_fullname) {
-            // First name attribute
-            $attributes[$this->mapping->firstname][0] = strstr($attributes[$this->config->field_idp_firstname][0], " ", true)
-                            ? core_text::strtoupper(trim(strstr($attributes[$this->config->field_idp_firstname][0], " ", true)))
-                            : core_text::strtoupper(trim($attributes[$this->config->field_idp_firstname][0]));
-            // Last name attribute
-            $attributes[$this->mapping->lastname][0] = strstr($attributes[$this->config->field_idp_lastname][0], " ")
-                            ? core_text::strtoupper(trim(strstr($attributes[$this->config->field_idp_lastname][0], " ")))
-                            : core_text::strtoupper(trim($attributes[$this->config->field_idp_lastname][0]));
-        } else {
-
-            // Setting default to empty string to avoid notices being thrown
-            $attributes[$this->mapping->firstname][0] = '';
-            $attributes[$this->mapping->lastname][0] = '';
-
-            if (isset($attributes[$this->config->field_idp_firstname][0])) {
-                $attributes[$this->mapping->firstname][0] = trim($attributes[$this->config->field_idp_firstname][0]);
-            }
-
-            if (isset($attributes[$this->config->field_idp_lastname][0])) {
-                $attributes[$this->mapping->lastname][0] = trim($attributes[$this->config->field_idp_lastname][0]);
-            }
-        }
 
         // User Id returned from IdP
         // Will be used to get user from our Moodle database if exists
@@ -668,12 +629,12 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                     \core\output\notification::NOTIFY_WARNING);
         }
 
-        if ($this->config->field_idp_fullname) {
+        if (!empty($this->config->field_idp_fullname)) {
             echo $OUTPUT->notification('The feature <tt>field_idp_fullname</tt> of splitting the full '
                     . 'name into the first and the last names '
-                    . 'is deprecated and will be removed in the future. '
+                    . 'has been removed. '
                     . 'Use an authproc in the SimpleSAMLphp config to achieve the same result.',
-                    \core\output\notification::NOTIFY_WARNING);
+                    \core\output\notification::NOTIFY_ERROR);
         }
 
         echo $OUTPUT->notification('Everything seems ok', \core\output\notification::NOTIFY_SUCCESS);

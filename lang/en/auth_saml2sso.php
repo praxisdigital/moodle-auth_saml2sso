@@ -40,9 +40,6 @@ $string['label_authsource']                         = 'SP auth source name';
 $string['label_logout_url_redir']                   = 'Logout URL';
 $string['label_logout']                             = 'Click here to logout';
 $string['label_edit_profile']                       = 'Can user edit profile?';
-$string['label_field_idp_firstname']                = 'Firstname field from Identity Provider';
-$string['label_field_idp_lastname']                 = 'Lastname field from Identity Provider';
-$string['label_field_idp_fullname']                 = 'Full name from Identity Provider';
 $string['label_instructions_title']                 = 'Instructions';
 $string['label_instructions_p1']                    = '<p>You must fill the following Data mapping fields as:</p><ul><li>Firstname => givenName</li><li>Surname => surname</li><li>Email address: => email</li></ul><p>You can change this in <code>$stringmapping</code> array in <code>auth.php</code></p>';
 $string['label_allow_empty_email']                  = 'Allow empty email';
@@ -64,9 +61,6 @@ $string['help_authsource']                          = 'Service Provider authenti
 $string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url)';
 $string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile';
-$string['help_field_idp_firstname']                 = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user first name' ;
-$string['help_field_idp_lastname']                  = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user last name';
-$string['help_field_idp_fullname']                  = '<strong>deprecated, use an authproc</strong> Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
 $string['help_session_control']                     = 'Apply the global setting \'' 
                                                     . (new lang_string('limitconcurrentlogins', 'core_auth'))->out('en')
                                                     . '\' if it is equal to 1, except for admin users.';

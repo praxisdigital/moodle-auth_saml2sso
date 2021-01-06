@@ -37,9 +37,6 @@ $string['label_authsource']                         = 'Nome do provedor de servi
 $string['label_logout_url_redir']                   = 'URL de logout';
 $string['label_logout']                             = 'Clique aqui para sair';
 $string['label_edit_profile']                       = 'Usuário pode editar perfil?';
-$string['label_field_idp_firstname']                = 'Campo no IdP para o primeiro nome';
-$string['label_field_idp_lastname']                 = 'Campo no IdP para o sobrenome';
-$string['label_field_idp_fullname']                 = 'Nome completo no IdP';
 $string['label_instructions_title']                 = 'Instruções';
 $string['label_instructions_p1']                    = '<p>Você deve preencher os campos abaixo em Mapeamento de dados:</p><ul><li>Nome => givenName</li><li>Sobrenome => surname</li><li>Endereço de email: => email</li></ul><p>Você pode mudar isso no array <code>$stringmapping</code> no arquivo <code>auth.php</code></p>';
 
@@ -54,9 +51,6 @@ $string['help_authsource']                          = 'Nome da fonte de autentic
 $string['help_logout_url_redir']                    = 'URL para redirecionar os usuários ao sairem do Moodle. Se a URL for inválida ou vazia, o redirecionamento será para a página inicial do Moodle. (ex.: https://meusite.com/outraurl/)';
 $string['nouser']                                   = 'Não existe um usuário com a identificação informada e a autoinscrição não está habilitada. A identificação informada foi: ';
 $string['help_edit_profile']                        = 'Se usuários não podem editar perfil, o link de perfil não é exibido';
-$string['help_field_idp_firstname']                 = 'Campo no IdP que contém o primeiro nome do usuário';
-$string['help_field_idp_lastname']                  = 'Campo no IdP que contém o sobrenome do usuário';
-$string['help_field_idp_fullname']                  = 'O campo com o nome do usuário no IdP é um único campo? Se sim, preencha com o mesmo valor nos campos primeiro nome e sobrenome abaixo';
 
 //error config strings
 $string['error_create_user']                        = 'Ocorreu um erro ao criar a conta de usuário. Por favor, entre em contato com o administrador.';

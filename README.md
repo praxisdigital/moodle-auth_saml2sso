@@ -28,15 +28,22 @@ The key for this plugin is that you can use your exists Service Provider (SP) wi
 * Username mapping - Which attribute from IdP should be used for username
 * Username checking - Where to check if the username exists
 * Auto create users - Allow create new users
-* **new** Limit concurrent logins to 1 if configured as global setting
+* Limit concurrent logins to 1 if configured as global setting
 * SP source name - Generally default-sp in SimpleSAMLphp
 * Logout URL to redirect users after logout
 * User synchronization source (see below)
 * Allow users to edit or not the profile
-* ~~Ability to break the full name from IdP into firstname and lastname~~ *deprecated, this is the last release supporting it: see below*
 * **new** Have an empty caption text for the button - To be able to use an image with text included instead.
 
 To override the authentication and login directly in Moodle (ex.: using admin account), add the `saml=off` parameter in the URL (ex.: https://my.moodle/login/index.php?saml=off)
+
+## Upgrade to 3.10
+
+You cannot upgrade directly from Moodle < 3.4, because incompatible functions.
+In the case, you must perform an intermedial upgrade step to a Moodle >= 3.4 and < 3.9 with a plugin version < 3.10.
+
+The feature to break the full name from IdP into firstname and lastname has been removed because inconsistencies in results.
+If you can replace it with a SimpleSAMLphp authproc filter: see below.
 
 ## Limit concurrent logins
 According Moodle documentation, SSO-auth modules don't apply "limit concurrent logins" restriction.
