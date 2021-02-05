@@ -38,7 +38,6 @@ $string['label_logout_url_redir']                   = 'URL de logout';
 $string['label_logout']                             = 'Clique aqui para sair';
 $string['label_edit_profile']                       = 'Usuário pode editar perfil?';
 $string['label_instructions_title']                 = 'Instruções';
-$string['label_instructions_p1']                    = '<p>Você deve preencher os campos abaixo em Mapeamento de dados:</p><ul><li>Nome => givenName</li><li>Sobrenome => surname</li><li>Endereço de email: => email</li></ul><p>Você pode mudar isso no array <code>$stringmapping</code> no arquivo <code>auth.php</code></p>';
 
 //_help config strings
 $string['help_sp_path']                             = 'Caminho absoluto da instalação do provedor de serviço. Ex.: /var/www/simplesamlphp/';
@@ -57,11 +56,5 @@ $string['error_create_user']                        = 'Ocorreu um erro ao criar 
 $string['error_sp_path']                            = 'O caminho do Provedor de Serviço (SP) SAML2 deve ser informado';
 $string['error_idpattr']                            = 'O campo para mapear username deve ser informado';
 $string['error_authsource']                         = 'O nome do provedor de serviço a ser invocado deve ser informado';
-$string['error_field_idp_firstname']                = 'O campo no IdP para o primeiro nome deve ser informado';
-$string['error_field_idp_lastname']                 = 'O campo no IdP para o sobrenome deve ser informado';
-$string['error_lockconfig_field_map_firstname']     = 'O campo Nome no Mapeamento de dados deve ser informado';
-$string['error_lockconfig_field_map_lastname']      = 'O campo Sobrenome no Mapeamento de dados deve ser informado';
-$string['error_lockconfig_field_map_email']         = 'O campo Endereço de email no Mapeamento de dados deve ser informado';
-$string['error_novalidemailfromidp']                = 'Nenhum e-mail válido foi retornado do Provedor de Identidade';
 
 $string['success_config']                           = 'Todas as configurações foram salvas';

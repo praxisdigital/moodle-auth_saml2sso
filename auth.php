@@ -67,8 +67,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     public static $stringmapping = array(
         'email' => 'email',
         'idnumber' => 'idnumber',
-        'firstname' => 'givenName',
-        'lastname' => 'surname'
     );
 
     /**
@@ -311,34 +309,25 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             session_id()
         );
             
-        $attributes = $auth->getAttributes();
-
-        // Email attribute
-        // here we insure that e-mail returned from identity provider (IdP) is catched
-        // whenever it is email or mail attribute name.
-        if (isset($attributes['email'])) {
-            $attributes[$this->mapping->email][0] = core_text::strtolower(trim($attributes['email'][0]));
-        } else if (isset($attributes['mail'])) {
-            $attributes[$this->mapping->email][0] = core_text::strtolower(trim($attributes['mail'][0]));
-        } else if (!$this->config->allow_empty_email) {
-            $this->error_page(get_string('error_novalidemailfromidp', self::COMPONENT_NAME));
-        }
-        // if $this->config->allow_empty_email is true and the IdP don't provide an
-        // email address, the user is redirect to the profile page to complete.
-
+        $saml_attributes = $auth->getAttributes();  // Attributes from SAML assertion.
         // User Id returned from IdP
         // Will be used to get user from our Moodle database if exists
         // create_user_record lowercases the username, so we need to lower it here.
-        $uid = trim(core_text::strtolower($attributes[$this->config->idpattr][0]));
-
-        // Now we check if the key returned from IdP exists in our Moodle database
-        $attributes = $this->get_userinfo($uid);
-        if (!isset($attributes[$this->config->moodle_mapping])) {
+        if (empty($saml_attributes[$this->config->idpattr])) {
             $event = \auth_saml2sso\event\not_searchable::create(array());
             $event->trigger();
             $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
         }
-        $criteria = array($this->config->moodle_mapping => $attributes[$this->config->moodle_mapping]);
+        $uid = trim(core_text::strtolower($saml_attributes[$this->config->idpattr][0]));
+
+        // Now we check if the key returned from IdP exists in our Moodle database
+        $userinfo = $this->get_userinfo($uid);  // Already mapped attributes.
+        if (empty($userinfo[$this->config->moodle_mapping])) {
+            $event = \auth_saml2sso\event\not_searchable::create(array());
+            $event->trigger();
+            $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
+        }
+        $criteria = array($this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]);
         $isuser = $DB->get_record('user', $criteria);
 
         if ($isuser) {
@@ -404,14 +393,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             redirect($urltogo);
             exit;
         }
-    }
-
-    /**
-     * Old syntax of class constructor for backward compatibility.
-     */
-    public function auth_plugin_saml2sso() {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
-        self::__construct();
     }
 
     /**
@@ -571,7 +552,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         
         @include($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
         if ($config['store.type'] == 'phpsession') {
-            echo $OUTPUT->notification('It seems SimpleSAMLphp uses default PHP session storage, it could be troublesome: switch to another store.type in config.php', \core\output\notification::NOTIFY_INFO);
+            echo $OUTPUT->notification('It seems SimpleSAMLphp uses default PHP session storage, it could be troublesome: switch to another store.type in config.php', \core\output\notification::NOTIFY_WARNING);
         }
 
         $sourcesnames = array_map(function($source){

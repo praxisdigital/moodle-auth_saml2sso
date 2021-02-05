@@ -269,16 +269,6 @@ if ($ADMIN->fulltree) {
         )
     );
     
-    $field_setting = 'allow_empty_email';
-    $settings->add(new admin_setting_configselect(
-            'auth_saml2sso/' . $field_setting,
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'),
-            new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            0,
-            $yesno
-        )
-    );
-
     // Display locking / mapping of profile fields.
     $authplugin = get_auth_plugin('saml2sso');
     display_auth_lock_options(
