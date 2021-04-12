@@ -112,7 +112,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         return [[
             'url' => new moodle_url($url),
-            'name' => $button_name,
+            'name' => format_string($button_name),
             'iconurl' => $button_path
         ]];
     }
