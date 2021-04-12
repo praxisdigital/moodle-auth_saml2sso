@@ -93,7 +93,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * Added by Praxis
      */
     public function loginpage_idp_list($wantsurl) {
-        $url = '?saml=on';
+        $url = '/login/?saml=on';
 
         if (!empty($this->config->button_url)) {
             $button_path = new moodle_url($this->config->button_url);
