@@ -37,10 +37,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * The name of the component. Used by the configuration.
      */
     const COMPONENT_NAME = \auth_saml2sso\COMPONENT_NAME;
-    /**
-     * Legacy name of the component.
-     */
-    const LEGACY_COMPONENT_NAME = 'auth/saml2sso';
 
     /**
      * Config vars
@@ -75,8 +71,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     public function __construct() {
         $this->authtype = \auth_saml2sso\AUTH_NAME;
         $componentName = (array) get_config(self::COMPONENT_NAME);
-        $legacyComponentName = (array) get_config(self::LEGACY_COMPONENT_NAME);
-        $this->config = (object) array_merge($this->defaults, $componentName, $legacyComponentName);
+        $this->config = (object) array_merge($this->defaults, $componentName);
         $this->mapping = (object) self::$stringmapping;
     }
 
@@ -140,6 +135,19 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         return $moodleattributes;
     }
 
+    private function normalize_username($username) {
+        global $DB;
+        
+        $uid = trim(core_text::strtolower($username));
+        $dbfieldinfo = $DB->get_columns('user');
+        if (strlen($uid) >= $dbfieldinfo['username']->max_length) {
+            // If longer than the Moodle field, it uses an hash.
+            $uid = sha1($uid);
+        }
+
+        return $uid;
+    }
+    
     /**
      * Read user information from the current simpleSAMLphp session.
      *
@@ -154,8 +162,8 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
 
         $attributes = $auth->getAttributes();
-        $uid = trim(core_text::strtolower($attributes[$this->config->idpattr][0]));
-        if (core_text::strtolower($username) != $uid) {
+        $uid = $this->normalize_username($attributes[$this->config->idpattr][0]);
+        if ($this->normalize_username($username) != $uid) {
             // Not the current user.
             return false;
         }
@@ -177,7 +185,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
             // Make usename lowercase
             if ($key == 'username'){
-                $result[$key] = strtolower($attributes[$value][0]);
+                $result[$key] = $this->normalize_username($attributes[$value][0]);
             }
             else {
                 $result[$key] = $attributes[$value][0];
@@ -318,26 +326,27 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             $event->trigger();
             $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
         }
-        $uid = trim(core_text::strtolower($saml_attributes[$this->config->idpattr][0]));
+        $uid = $this->normalize_username($saml_attributes[$this->config->idpattr][0]);
 
-        // Now we check if the key returned from IdP exists in our Moodle database
-        $userinfo = $this->get_userinfo($uid);  // Already mapped attributes.
+        // Get attributes from the assertion already mapped to Moodle fields.
+        $userinfo = $this->get_userinfo($uid);
         if (empty($userinfo[$this->config->moodle_mapping])) {
             $event = \auth_saml2sso\event\not_searchable::create(array());
             $event->trigger();
             $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
         }
+        // Now we check if the key returned from IdP exists in our Moodle database.
         $criteria = array($this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]);
         $isuser = $DB->get_record('user', $criteria);
-
-        if ($isuser) {
+        
+        if (!empty($isuser)) {
             core_user::require_active_user($isuser, true, true);
         }
         else {
             // Verify if user can be created
             if ((int) $this->config->autocreate) {
                 // Insert new user
-                $isuser = create_user_record($uid, '', $this->authtype);
+                $isuser = create_user_record($userinfo->username, '', $this->authtype);
             } else {
                 //If autocreate is not allowed, show error
                 $this->error_page(get_string('nouser', self::COMPONENT_NAME) . $uid);

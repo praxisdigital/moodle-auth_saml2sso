@@ -37,6 +37,7 @@ if ($hassiteconfig && !get_config(auth_saml2sso\COMPONENT_NAME, 'hide_takeover_p
 }
 
 if ($ADMIN->fulltree) {
+    $saml2_authplugin = get_auth_plugin('saml2sso');
 
     if (empty(getenv('SIMPLESAMLPHP_CONFIG_DIR'))
             && empty(get_config(auth_saml2sso\COMPONENT_NAME, 'sp_path'))) {
@@ -270,8 +271,9 @@ if ($ADMIN->fulltree) {
     );
     
     // Display locking / mapping of profile fields.
-    $authplugin = get_auth_plugin('saml2sso');
     display_auth_lock_options(
-            $settings, $authplugin->authtype, $authplugin->userfields, new lang_string('auth_fieldlocks_help', 'auth'), true, false, $authplugin->get_custom_user_profile_fields()
+            $settings, $saml2_authplugin->authtype, $saml2_authplugin->userfields,
+            new lang_string('auth_fieldlocks_help', 'auth'), true, false, 
+            $saml2_authplugin->get_custom_user_profile_fields()
     );
 }
