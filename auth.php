@@ -293,7 +293,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Retrieve the Moodle session ID from the local SSO session data
         $sspsession = \SimpleSAML\Session::getSessionFromRequest();
         $prevmoodlesession = $sspsession->getData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
-            'moodle:session'
+            'moodle:' . get_site_identifier() . 'session'
         );
 
         // Moodle session changed within the same local SSO session.
@@ -303,7 +303,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 $event->trigger();
             }
             $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
-                'moodle:session'
+                'moodle:' . get_site_identifier() . 'session'
             );
             $auth->login($param);
         }
@@ -313,7 +313,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         // Save the Moodle session ID in the local SSO session data.
         $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
-            'moodle:session',
+            'moodle:' . get_site_identifier() . 'session',
             session_id()
         );
             
