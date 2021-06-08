@@ -346,7 +346,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             // Verify if user can be created
             if ((int) $this->config->autocreate) {
                 // Insert new user
-                $isuser = create_user_record($userinfo->username, '', $this->authtype);
+                $isuser = create_user_record($uid, '', $this->authtype);
             } else {
                 //If autocreate is not allowed, show error
                 $this->error_page(get_string('nouser', self::COMPONENT_NAME) . $uid);
