@@ -240,15 +240,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * Called when user hit the logout button
-     * Will get the URL from the logged in IdP if Single Sign Off is setted
-     * and then redirect to config logout URL setted up in plugin config
-     * If URL is invalid or empty, redirect to Moodle main page
+     * Post logout hook. Triggers the SLO process.
+     *
+     * @param stdClass $user clone of USER object object before the user session was terminated
      */
-    public function logoutpage_hook() {
-        global $CFG, $USER;
+    public function postlogout_hook($user) {
+         global $CFG;
 
-        if ($USER->auth != $this->authtype) {
+        if ($user->auth != $this->authtype) {
             // SingleLogOut must not be called for user handled by other plugins.
             return;
         }
@@ -260,11 +259,8 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             $auth = $this->getsspauth();
 
             $urllogout = $auth->getLogoutURL($urllogout);
+            redirect($urllogout);
         }
-
-        require_logout();
-
-        redirect($urllogout);
     }
 
     /**
