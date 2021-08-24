@@ -552,7 +552,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
         $sspconfig = \SimpleSAML\Configuration::getInstance();
-        if (version_compare($sspconfig->getVersion(), '1.18.6') < 0) {
+        if (version_compare($sspconfig->getVersion(), '1.18.8') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
                     . $sspconfig->getVersion() . ') and insecure, consider to upgrade it', \core\output\notification::NOTIFY_WARNING);
         } else {
@@ -577,6 +577,15 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         if (empty($auth)) {
             echo $OUTPUT->notification('SimpleSAMLphp library loading failed!', \core\output\notification::NOTIFY_WARNING);
             return;
+        }
+        
+        if (!empty($this->config->logout_url_redir)) {
+            try {
+                \SimpleSAML\Utils\HTTP::checkURLAllowed($this->config->logout_url_redir);
+            }
+            catch (\Exception $e) {
+                echo $OUTPUT->notification($this->config->logout_url_redir . ' is not allowed as redirect URL, check SSP config.', \core\output\notification::NOTIFY_WARNING);
+            }
         }
 
         if (empty($this->config->idpattr)) {

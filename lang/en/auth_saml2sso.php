@@ -55,7 +55,7 @@ $string['help_moodle_mapping']                      = 'Where to check if the use
         get_string('idnumber') . '\', remember to mapping in Data mapping below';
 $string['help_autocreate']                          = 'Allow create new users?';
 $string['help_authsource']                          = 'Service Provider authentication source name available in /config/authsources.php SimpleSAMLphp installation';
-$string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url)';
+$string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url). Remember to include this url in the <tt>trusted.url.domains</tt> SSP config.';
 $string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile. ' .
         'If the IdP/ADFS doesn\'t provide mandatory attribute the user will be locked out!';

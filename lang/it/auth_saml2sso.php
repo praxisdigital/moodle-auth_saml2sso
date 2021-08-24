@@ -55,7 +55,7 @@ $string['help_moodle_mapping']                      = 'Il campo del profilo Mood
         get_string('idnumber') . '\', ricordarsi di mapparlo nelle impostazioni più sotto';
 $string['help_autocreate']                          = 'Crea l\'utente Moodle all\'accesso se non presente';
 $string['help_authsource']                          = 'Nome della sorgente di autenticazione del Service Provider, come registrata in /config/authsources.php';
-$string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo il logout. Se non è valido o vuoto, si verrà rediretti alla pagina principale di Moodle. (es.: https://go.to/another/url)';
+$string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo il logout. Se non è valido o vuoto, si verrà rediretti alla pagina principale di Moodle. (es.: https://go.to/another/url). Ricordatevi di includere questo URL in <tt>trusted.url.domains</tt> della configurazione di SSP.';
 $string['nouser']                                   = 'Non c\'è un utente Moodle con l\'id restituito e la creazione automatica è disabilitata. L\'id restituito è: ';
 $string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo. ' .
         'Se l\'IdP/ADFS non fornisce gli attributi obbligatori l\'utente non potrà accedere!';
