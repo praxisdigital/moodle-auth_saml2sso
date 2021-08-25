@@ -240,7 +240,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     }
 
     /**
-     * Post logout hook. Triggers the SLO process.
+     * Post logout hook, triggers the SLO process.
      *
      * @param stdClass $user clone of USER object object before the user session was terminated
      */
@@ -252,13 +252,27 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             return;
         }
 
-        $urllogout = filter_var($this->config->logout_url_redir, FILTER_VALIDATE_URL) ? $this->config->logout_url_redir : $CFG->wwwroot;
-
-        // Check if we need to sign off users from IdP too
+        // Check if we need to sign off user from IdP too.
         if ((int) $this->config->single_signoff) {
             $auth = $this->getsspauth();
 
-            $urllogout = $auth->getLogoutURL($urllogout);
+            if (filter_var($this->config->logout_url_redir, FILTER_VALIDATE_URL)) {
+                $returnTo = $this->config->logout_url_redir;
+                try {
+                    // Moodle session is already destroyed, but if the config redirects 
+                    // to a untrusted URL the user will receive a useless exception. 
+                    \SimpleSAML\Utils\HTTP::checkURLAllowed($returnTo);
+                }
+                catch (\Exception $e) {
+                    debugging($returnTo . ' is not allowed as redirect URL, check your SSP config.', DEBUG_NORMAL);
+                    $returnTo = $CFG->wwwroot; // The root should always be trusted. 
+                }
+            }
+            else {
+                $returnTo = $CFG->wwwroot;
+            }
+            
+            $urllogout = $auth->getLogoutURL($returnTo);
             redirect($urllogout);
         }
     }
