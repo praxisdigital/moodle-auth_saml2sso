@@ -40,16 +40,10 @@ $string['label_authsource']                         = 'SP auth source name';
 $string['label_logout_url_redir']                   = 'Logout URL';
 $string['label_logout']                             = 'Click here to logout';
 $string['label_edit_profile']                       = 'Can user edit profile?';
-$string['label_field_idp_firstname']                = 'Firstname field from Identity Provider';
-$string['label_field_idp_lastname']                 = 'Lastname field from Identity Provider';
-$string['label_field_idp_fullname']                 = 'Full name from Identity Provider';
 $string['label_instructions_title']                 = 'Instructions';
-$string['label_instructions_p1']                    = '<p>You must fill the following Data mapping fields as:</p><ul><li>Firstname => givenName</li><li>Surname => surname</li><li>Email address: => email</li></ul><p>You can change this in <code>$stringmapping</code> array in <code>auth.php</code></p>';
-$string['label_allow_empty_email']                  = 'Allow empty email';
-$string['label_session_control']                    = 'Apply session limit';
+$string['label_session_control']                    = (new lang_string('limitconcurrentlogins', 'core_auth'))->out('en');
 
 //_help config strings
-$string['help_allow_empty_email']                   = 'Allow the IdP/ADFS don\'t return Email or Mail value. User will be prompted to complete the profile.';
 $string['help_button_url']                          = 'Url to an image that will be used as login button. Max 50px high';
 $string['help_show_button_name']                    = 'Decide if the button caption should be displayed. A simple way to remove the text from the button';
 $string['help_button_name']                         = 'A caption for the login button';
@@ -57,31 +51,23 @@ $string['help_sp_path']                             = 'Absolute path to Service 
 $string['help_dual_login']                          = 'Define if prompt the user with standard Moodle login page';
 $string['help_single_signoff']                      = 'Single Sign Off users from Moodle and IdP?';
 $string['help_idpattr']                             = 'Attribute from the Identity Provider used as the Moodle username.';
-$string['help_moodle_mapping']                      = 'Where to check if the username exists? If using \'' .
+$string['help_moodle_mapping']                      = 'Where to check if the username exists? If using \'Email address\' or \'' .
         get_string('idnumber') . '\', remember to mapping in Data mapping below';
 $string['help_autocreate']                          = 'Allow create new users?';
 $string['help_authsource']                          = 'Service Provider authentication source name available in /config/authsources.php SimpleSAMLphp installation';
-$string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url)';
+$string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url). Remember to include this url in the <tt>trusted.url.domains</tt> SSP config.';
 $string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
-$string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile';
-$string['help_field_idp_firstname']                 = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user first name' ;
-$string['help_field_idp_lastname']                  = '<strong>deprecated, use an authproc</strong> Field from Identity Provider containing the user last name';
-$string['help_field_idp_fullname']                  = '<strong>deprecated, use an authproc</strong> Is the username from Identity Provider in a single field? If yes, fill with the same value in the fields firstname and lastname below';
-$string['help_session_control']                     = 'If the global setting \'' 
+$string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile. ' .
+        'If the IdP/ADFS doesn\'t provide mandatory attribute the user will be locked out!';
+$string['help_session_control']                     = 'Apply the global setting \'' 
                                                     . (new lang_string('limitconcurrentlogins', 'core_auth'))->out('en')
-                                                    . '\' is 1, honours the restriction for non-admin users.';
+                                                    . '\' if it is equal to 1, except for admin users.';
 
 //error config strings
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';
 $string['error_sp_path']                            = 'The path to SimpleSAMLphp libraries must be given in config';
 $string['error_idpattr']                            = 'A Username mapping attribute must be given';
 $string['error_authsource']                         = 'A Service Provider source name must be given';
-$string['error_field_idp_firstname']                = 'The Firstname field from Identity Provider is mandatory';
-$string['error_field_idp_lastname']                 = 'The lastname field from Identity Provider is mandatory';
-$string['error_lockconfig_field_map_firstname']     = 'The First name in Data mapping fields is mandatory';
-$string['error_lockconfig_field_map_lastname']      = 'The Surname in Data mapping fields is mandatory';
-$string['error_lockconfig_field_map_email']         = 'The Email address in Data mapping fields is mandatory';
-$string['error_novalidemailfromidp']                = 'There is no valid e-mail address from Identity Provider';
 $string['error_you_are_still_connected']            = 'You are still connected in a SSO session';
 $string['error_nokey']                              = 'The Identity Provider has not provide the attribute need to identify you';
 

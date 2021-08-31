@@ -29,6 +29,7 @@ $string['settings_saml2sso']                        = '';
 //label config strings
 $string['label_button_url']                         = 'URL icona';
 $string['label_button_name']                        = 'Etichetta bottone';
+$string['label_show_button_name']                   = 'Mostra etichetta del bottone';
 $string['label_sp_path']                            = 'Percorso librerie SimpleSAMLphp';
 $string['label_dual_login']                         = 'Dual login';
 $string['label_single_signoff']                     = 'Single Sign Off';
@@ -39,47 +40,34 @@ $string['label_authsource']                         = 'Nome sorgente autenticazi
 $string['label_logout_url_redir']                   = 'URL di logout';
 $string['label_logout']                             = 'Disconnessione';
 $string['label_edit_profile']                       = 'L\'utente può modificarsi il profilo?';
-$string['label_field_idp_firstname']                = 'Attributo IdP del nome';
-$string['label_field_idp_lastname']                 = 'Attributo IdP del cognome';
-$string['label_field_idp_fullname']                 = 'Nome completo dall\'IdP?';
 $string['label_instructions_title']                 = 'Istruzioni';
-$string['label_instructions_p1']                    = '<p>La mappatura è richiesta per i campi:</p><ul><li>Nome => givenName</li><li>Cognome => surname</li><li>Indirizzo email => email</li></ul><p>Puoi cambiarla dall\'array <code>$stringMapping</code> in <code>auth.php</code></p>';
-$string['label_allow_empty_email']                  = 'Accetta email nulle';
-$string['label_session_control']                    = 'Applica limite di sessioni';
+$string['label_session_control']                    = (new lang_string('limitconcurrentlogins', 'core_auth'))->out('it');
 
 //_help config strings
-$string['help_allow_empty_email']                   = 'Permette all\'IdP/ADFS di non fornire il valore Email o Mail. All\'utente verrà richiesto di completare il profilo';
 $string['help_button_url']                          = 'URL dell\'icona da usare sul bottone di login. Massimo 50 pixel di altezza';
+$string['help_show_button_name']                    = 'Mostra l\'etichetta del bottone o solo l\'icona.';
 $string['help_button_name']                         = 'Etichetta per il bottone di login';
 $string['help_sp_path']                             = 'Percorso assoluto dell\'installazione di SSP. Es.: /var/www/simplesamlphp/';
 $string['help_dual_login']                          = 'Mostra all\'utente la maschera di login di Moodle';
 $string['help_single_signoff']                      = 'Il logout da Moodle attiva anche il logout dall\'IdP e dalla sessione di Single SignOn';
 $string['help_idpattr']                             = 'L\'attributo ricevuto dall\'IdP da usare come ' . get_string('username') . ' in Moodle.';
-$string['help_moodle_mapping']                      = 'Il campo del profilo Moodle con cui cercare l\'utente. Se \'' .
+$string['help_moodle_mapping']                      = 'Il campo del profilo Moodle con cui cercare l\'utente. Se \'Indirizzo email\' o \'' .
         get_string('idnumber') . '\', ricordarsi di mapparlo nelle impostazioni più sotto';
 $string['help_autocreate']                          = 'Crea l\'utente Moodle all\'accesso se non presente';
 $string['help_authsource']                          = 'Nome della sorgente di autenticazione del Service Provider, come registrata in /config/authsources.php';
-$string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo il logout. Se non è valido o vuoto, si verrà rediretti alla pagina principale di Moodle. (es.: https://go.to/another/url)';
+$string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo il logout. Se non è valido o vuoto, si verrà rediretti alla pagina principale di Moodle. (es.: https://go.to/another/url). Ricordatevi di includere questo URL in <tt>trusted.url.domains</tt> della configurazione di SSP.';
 $string['nouser']                                   = 'Non c\'è un utente Moodle con l\'id restituito e la creazione automatica è disabilitata. L\'id restituito è: ';
-$string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo';
-$string['help_field_idp_firstname']                 = '<strong>deprecato, usare una authproc</strong> Attributo ricevuto dall\'IdP contenente il nome' ;
-$string['help_field_idp_lastname']                  = '<strong>deprecato, usare una authproc</strong> Attributo ricevuto dall\'IdP contenente il cognome';
-$string['help_field_idp_fullname']                  = '<strong>deprecato, usare una authproc</strong> Il nome completo è restituito dall\'IdP in un campo unico (es. cn)? Se sì, indicarlo sotto in entrambi gli attributi per il nome e il cognome';
-$string['help_session_control']                     = 'Se l\'opzione  \'' 
+$string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo. ' .
+        'Se l\'IdP/ADFS non fornisce gli attributi obbligatori l\'utente non potrà accedere!';
+$string['help_session_control']                     = 'Rispetta l\'opzione \'' 
                                                     . (new lang_string('limitconcurrentlogins', 'core_auth'))->out('it')
-                                                    . '\' è impostato a 1, viene rispettata per gli utenti non amministratori.';
+                                                    . '\' se è impostato a 1, eccetto per gli utenti amministratori.';
 
 //error config strings
 $string['error_create_user']                        = 'Errore nella creazione del profilo Moodle. Contattare l\'amministratore.';
 $string['error_sp_path']                            = 'Il percorso delle librerie SimpleSAMLphp dev\'essere specificato nella configurazione';
 $string['error_idpattr']                            = 'Un attributo id dev\'essere specificato';
 $string['error_authsource']                         = 'Una sorgente di autenticazione dev\'essere specificata';
-$string['error_field_idp_firstname']                = 'L\'attributo per il nome è obbligatorio';
-$string['error_field_idp_lastname']                 = 'L\'attributo per il cognome è obbligatorio';
-$string['error_lockconfig_field_map_firstname']     = 'La mappatura del nome è obbligatoria';
-$string['error_lockconfig_field_map_lastname']      = 'La mappatura del cognome è obbligatoria';
-$string['error_lockconfig_field_map_email']         = 'La mappatura dell\'Indirizzo email è obbligatoria';
-$string['error_novalidemailfromidp']                = 'Il tuo Identity Provider non fornisce un indirizzo email valido';
 $string['error_you_are_still_connected']            = 'Sei ancora connesso a una sessione SSO';
 $string['error_nokey']                              = 'L\'Identity Provider non ha fornito un attributo necessario per identificarti';
 

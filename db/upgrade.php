@@ -32,24 +32,6 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_auth_saml2sso_upgrade($oldversion) {
     global $CFG, $DB;
 
-    // Moodle v2.8.0 release upgrade line.
-    // Put any upgrade step following this.
-    // Moodle v2.9.0 release upgrade line.
-    // Put any upgrade step following this.
-    // Moodle v3.0.0 release upgrade line.
-    // Put any upgrade step following this.
-    // Moodle v3.1.0 release upgrade line.
-    // Put any upgrade step following this.
-    // Automatically generated Moodle v3.2.0 release upgrade line.
-    // Put any upgrade step following this.
-
-    if ($oldversion < 2017020700) {
-        // Convert info in config plugins from auth/saml2sso to auth_saml2sso.
-        upgrade_fix_config_auth_plugin_names('saml2sso');
-        upgrade_fix_config_auth_plugin_defaults('saml2sso');
-        upgrade_plugin_savepoint(true, 2017020700, 'auth', 'saml2sso');
-    }
-
     // Automatically generated Moodle v3.4.0 release upgrade line.
     // Put any upgrade step following this.
     if ($oldversion < 2018031000) {
@@ -73,5 +55,14 @@ function xmldb_auth_saml2sso_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2018112200, 'auth', 'saml2sso');
     }
 
+    if ($oldversion < 2021010602) {
+        // Delete old setting.
+        set_config('field_idp_fullname', null, 'auth_saml2sso');
+        set_config('field_idp_firstname', null, 'auth_saml2sso');
+        set_config('field_idp_lastname', null, 'auth_saml2sso');
+
+        upgrade_plugin_savepoint(true, 2021010602, 'auth', 'saml2sso');
+    }
+    
     return true;
 }

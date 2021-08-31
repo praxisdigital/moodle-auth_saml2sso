@@ -37,6 +37,7 @@ if ($hassiteconfig && !get_config(auth_saml2sso\COMPONENT_NAME, 'hide_takeover_p
 }
 
 if ($ADMIN->fulltree) {
+    $saml2_authplugin = get_auth_plugin('saml2sso');
 
     if (empty(getenv('SIMPLESAMLPHP_CONFIG_DIR'))
             && empty(get_config(auth_saml2sso\COMPONENT_NAME, 'sp_path'))) {
@@ -62,7 +63,6 @@ if ($ADMIN->fulltree) {
             $defaultsspdir)
     );
     
-    // Migrate from misleading entityid config key
     $field_setting = 'authsource';
     $settings->add(new admin_setting_configtext_with_maxlength(
             'auth_saml2sso/'. $field_setting,
@@ -270,53 +270,10 @@ if ($ADMIN->fulltree) {
         )
     );
     
-    $field_setting = 'allow_empty_email';
-    $settings->add(new admin_setting_configselect(
-            'auth_saml2sso/' . $field_setting,
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'),
-            new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            0,
-            $yesno
-        )
-    );
-
-    $field_setting = 'field_idp_fullname';
-    $settings->add(new admin_setting_configselect(
-            'auth_saml2sso/' . $field_setting, 
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
-            new lang_string('help_' . $field_setting, 'auth_saml2sso'), 
-            0, 
-            $yesno
-        )
-    );
-
-    $field_setting = 'field_idp_firstname';
-    $settings->add(new admin_setting_configtext_with_maxlength(
-            'auth_saml2sso/'. $field_setting,
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
-            new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            '',
-            PARAM_TEXT,
-            50,
-            255
-        )
-    );
-    
-    $field_setting = 'field_idp_lastname';
-    $settings->add(new admin_setting_configtext_with_maxlength(
-            'auth_saml2sso/'. $field_setting,
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
-            new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            '',
-            PARAM_TEXT,
-            50,
-            255
-        )
-    );
-    
     // Display locking / mapping of profile fields.
-    $authplugin = get_auth_plugin('saml2sso');
     display_auth_lock_options(
-            $settings, $authplugin->authtype, $authplugin->userfields, new lang_string('auth_fieldlocks_help', 'auth'), true, false, $authplugin->get_custom_user_profile_fields()
+            $settings, $saml2_authplugin->authtype, $saml2_authplugin->userfields,
+            new lang_string('auth_fieldlocks_help', 'auth'), true, false, 
+            $saml2_authplugin->get_custom_user_profile_fields()
     );
 }
