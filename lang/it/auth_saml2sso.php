@@ -26,7 +26,7 @@ $string['auth_saml2ssodescription']                 = 'Autentica gli utenti tram
 $string['pluginname']                               = 'SAML2 SSO Auth';
 $string['settings_saml2sso']                        = '';
 
-//label config strings
+// Label config strings.
 $string['label_button_url']                         = 'URL icona';
 $string['label_button_name']                        = 'Etichetta bottone';
 $string['label_show_button_name']                   = 'Mostra etichetta del bottone';
@@ -41,9 +41,9 @@ $string['label_logout_url_redir']                   = 'URL di logout';
 $string['label_logout']                             = 'Disconnessione';
 $string['label_edit_profile']                       = 'L\'utente può modificarsi il profilo?';
 $string['label_instructions_title']                 = 'Istruzioni';
-$string['label_session_control']                    = (new lang_string('limitconcurrentlogins', 'core_auth'))->out('it');
+$string['label_session_control']                    = get_string('limitconcurrentlogins', 'core_auth');
 
-//_help config strings
+// Help config strings.
 $string['help_button_url']                          = 'URL dell\'icona da usare sul bottone di login. Massimo 50 pixel di altezza';
 $string['help_show_button_name']                    = 'Mostra l\'etichetta del bottone o solo l\'icona.';
 $string['help_button_name']                         = 'Etichetta per il bottone di login';
@@ -59,11 +59,11 @@ $string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo
 $string['nouser']                                   = 'Non c\'è un utente Moodle con l\'id restituito e la creazione automatica è disabilitata. L\'id restituito è: ';
 $string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo. ' .
         'Se l\'IdP/ADFS non fornisce gli attributi obbligatori l\'utente non potrà accedere!';
-$string['help_session_control']                     = 'Rispetta l\'opzione \'' 
-                                                    . (new lang_string('limitconcurrentlogins', 'core_auth'))->out('it')
+$string['help_session_control']                     = 'Rispetta l\'opzione \''
+                                                    . get_string('limitconcurrentlogins', 'core_auth')
                                                     . '\' se è impostato a 1, eccetto per gli utenti amministratori.';
 
-//error config strings
+// Error config strings.
 $string['error_create_user']                        = 'Errore nella creazione del profilo Moodle. Contattare l\'amministratore.';
 $string['error_sp_path']                            = 'Il percorso delle librerie SimpleSAMLphp dev\'essere specificato nella configurazione';
 $string['error_idpattr']                            = 'Un attributo id dev\'essere specificato';
@@ -83,7 +83,7 @@ In questo caso per usare il login standard di Moodle occorre aggiungere il param
 Attivano il Dual login l\'utente deve scegliere il metodo di autenticazione.';
 $string['label_sync_settings']        = 'Sincronizzazione utenti';
 $string['label_sync_settings_help']   = '
-Un IdP SAML non può fornire un elenco di utenti da sincronizzare, ma può 
+Un IdP SAML non può fornire un elenco di utenti da sincronizzare, ma può
 appoggiarsi ad un backend LDAP / DB da cui possono essere letti.
 La configurazione deve quindi essere impostata dal plugin di autenticazione della sorgente';
 $string['label_user_directory']          = 'Sorgente utenti';

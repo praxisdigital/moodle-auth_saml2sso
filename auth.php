@@ -53,7 +53,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         'logout_url_redir' => '',
         'edit_profile' => 0,
         'allow_empty_email' => 0,
-        'delete_if_empty' => false,  // Delete the profile field value if the correspondig attribute is missing/empty
+        'delete_if_empty' => false,  // Delete the profile field value if the correspondig attribute is missing/empty.
     );
 
     /**
@@ -137,7 +137,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
     private function normalize_username($username) {
         global $DB;
-        
+
         $uid = trim(core_text::strtolower($username));
         $dbfieldinfo = $DB->get_columns('user');
         if (strlen($uid) >= $dbfieldinfo['username']->max_length) {
@@ -147,7 +147,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         return $uid;
     }
-    
+
     /**
      * Read user information from the current simpleSAMLphp session.
      *
@@ -183,7 +183,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 continue;
             }
 
-            // Make usename lowercase
+            // Make usename lowercase.
             if ($key == 'username'){
                 $result[$key] = $this->normalize_username($attributes[$value][0]);
             }
@@ -259,13 +259,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             if (filter_var($this->config->logout_url_redir, FILTER_VALIDATE_URL)) {
                 $returnTo = $this->config->logout_url_redir;
                 try {
-                    // Moodle session is already destroyed, but if the config redirects 
-                    // to a untrusted URL the user will receive a useless exception. 
+                    // Moodle session is already destroyed, but if the config redirects
+                    // to a untrusted URL the user will receive a useless exception.
                     \SimpleSAML\Utils\HTTP::checkURLAllowed($returnTo);
                 }
                 catch (\Exception $e) {
                     debugging($returnTo . ' is not allowed as redirect URL, check your SSP config.', DEBUG_NORMAL);
-                    $returnTo = $CFG->wwwroot; // The root should always be trusted. 
+                    $returnTo = $CFG->wwwroot; // The root should always be trusted.
                 }
             }
             else {
@@ -358,14 +358,12 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 // Insert new user
                 $isuser = create_user_record($uid, '', $this->authtype);
             } else {
-                //If autocreate is not allowed, show error
+                // If autocreate is not allowed, show error
                 $this->error_page(get_string('nouser', self::COMPONENT_NAME) . $uid);
             }
         }
 
-        /**
-         * We expected that here we have a existing user or a new one
-         */
+        // We expected that here we have a existing user or a new one.
         if ($isuser) {
             $USER = get_complete_user_data('username', $isuser->username);
         } else {

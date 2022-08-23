@@ -26,7 +26,7 @@ $string['auth_saml2ssodescription']                 = 'Users can login using SAM
 $string['pluginname']                               = 'SAML2 SSO Auth';
 $string['settings_saml2sso']                        = '';
 
-//label config strings
+// Label config strings.
 $string['label_button_url']                         = 'Url to button (image)';
 $string['label_button_name']                        = 'Button caption';
 $string['label_show_button_name']                   = 'Show button caption';
@@ -41,9 +41,9 @@ $string['label_logout_url_redir']                   = 'Logout URL';
 $string['label_logout']                             = 'Click here to logout';
 $string['label_edit_profile']                       = 'Can user edit profile?';
 $string['label_instructions_title']                 = 'Instructions';
-$string['label_session_control']                    = (new lang_string('limitconcurrentlogins', 'core_auth'))->out('en');
+$string['label_session_control']                    = get_string('limitconcurrentlogins', 'core_auth');
 
-//_help config strings
+// Help config strings.
 $string['help_button_url']                          = 'Url to an image that will be used as login button. Max 50px high';
 $string['help_show_button_name']                    = 'Decide if the button caption should be displayed. A simple way to remove the text from the button';
 $string['help_button_name']                         = 'A caption for the login button';
@@ -59,11 +59,11 @@ $string['help_logout_url_redir']                    = 'URL to redirect users on 
 $string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile. ' .
         'If the IdP/ADFS doesn\'t provide mandatory attribute the user will be locked out!';
-$string['help_session_control']                     = 'Apply the global setting \'' 
-                                                    . (new lang_string('limitconcurrentlogins', 'core_auth'))->out('en')
+$string['help_session_control']                     = 'Apply the global setting \''
+                                                    . get_string('limitconcurrentlogins', 'core_auth')
                                                     . '\' if it is equal to 1, except for admin users.';
 
-//error config strings
+// Error config strings.
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';
 $string['error_sp_path']                            = 'The path to SimpleSAMLphp libraries must be given in config';
 $string['error_idpattr']                            = 'A Username mapping attribute must be given';
