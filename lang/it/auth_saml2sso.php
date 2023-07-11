@@ -41,7 +41,6 @@ $string['label_logout_url_redir']                   = 'URL di logout';
 $string['label_logout']                             = 'Disconnessione';
 $string['label_edit_profile']                       = 'L\'utente può modificarsi il profilo?';
 $string['label_instructions_title']                 = 'Istruzioni';
-$string['label_session_control']                    = get_string('limitconcurrentlogins', 'core_auth');
 
 // Help config strings.
 $string['help_button_url']                          = 'URL dell\'icona da usare sul bottone di login. Massimo 50 pixel di altezza';
@@ -59,9 +58,7 @@ $string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo
 $string['nouser']                                   = 'Non c\'è un utente Moodle con l\'id restituito e la creazione automatica è disabilitata. L\'id restituito è: ';
 $string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo. ' .
         'Se l\'IdP/ADFS non fornisce gli attributi obbligatori l\'utente non potrà accedere!';
-$string['help_session_control']                     = 'Rispetta l\'opzione \''
-                                                    . get_string('limitconcurrentlogins', 'core_auth')
-                                                    . '\' se è impostato a 1, eccetto per gli utenti amministratori.';
+$string['help_session_control']                     = 'Rispetta l\'opzione \'{$a}\' se è impostata a 1, eccetto per gli utenti amministratori.';
 
 // Error config strings.
 $string['error_create_user']                        = 'Errore nella creazione del profilo Moodle. Contattare l\'amministratore.';
