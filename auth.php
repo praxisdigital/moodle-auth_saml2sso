@@ -269,7 +269,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 try {
                     // Moodle session is already destroyed, but if the config redirects
                     // to a untrusted URL the user will receive a useless exception.
-                    \SimpleSAML\Utils\HTTP::checkURLAllowed($returnTo);
+                    (new \SimpleSAML\Utils\HTTP())->checkURLAllowed($returnTo);
                 } catch (\Exception $e) {
                     debugging($returnTo . ' is not allowed as redirect URL, check your SSP config.', DEBUG_NORMAL);
                     $returnTo = $CFG->wwwroot; // The root should always be trusted.
@@ -601,7 +601,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         
         if (!empty($this->config->logout_url_redir)) {
             try {
-                \SimpleSAML\Utils\HTTP::checkURLAllowed($this->config->logout_url_redir);
+                (new \SimpleSAML\Utils\HTTP())->checkURLAllowed($this->config->logout_url_redir);
             }
             catch (\Exception $e) {
                 echo $OUTPUT->notification($this->config->logout_url_redir . ' is not allowed as redirect URL, check SSP config.', \core\output\notification::NOTIFY_WARNING);
