@@ -45,6 +45,10 @@ In the case, you must perform an intermedial upgrade step to a Moodle >= 3.4 and
 The feature to break the full name from IdP into firstname and lastname has been removed because inconsistencies in results.
 If you can replace it with a SimpleSAMLphp authproc filter: see below.
 
+## SimpleSAMLphp upgrade to 2.x
+
+Some static methods in SSP 1.x have been migrated to non-static in SSP 2.x; older version of this plugin (<2023071100) could raise errors during signoff if used with SSP 2.x library.
+
 ## Limit concurrent logins
 According Moodle documentation, SSO-auth modules don't apply "limit concurrent logins" restriction.
 
@@ -60,9 +64,11 @@ This is a common scenario for exams, while limits > 1 have not clear purposes.
 ## Single Sign Off
 SAML Single Sign Off (or better *SLO - Single LogOut*) is a tricky topic, Scott Cantor wrote a wide overview of the problem in the [Shibboleth wiki](https://shibboleth.atlassian.net/wiki/spaces/SHIB2/pages/2583494696/IdPEnableSLO).
 Regarding this Moodle plugin:
+
 * if Single Sign Off is disabled, logout from Moodle will leave SimpleSAMLphp local session untouched thus if the user click on SSO Login again she/he will log in Moodle without any password request. To avoid this confusing user experience, you could either set ForceAuthn to true in SP config or [limit concurrent logins](#Limit-concurrent-logins) in Moodle
 * if Single Sign Off is enabled, exiting from Moodle first destroyes the Moodle session, then starts with the IdP a SLO procedure that *should* kill any SP sessions in any application you logged-in; unfortunately, killing a SP session often **doesn't** destroy the application session protected by that SP, as you can see below
 * either Single Sign Off is enabled or not, if a third application starts a SLO process, the local SP session will be destroyed according SP metadata but the Moodle session will remain alive because there is no entry point in Moodle auth plugin interface to check if a session is still valid nor can SimpleSAMLphp invoke a callback in the Moodle codebase
+
 The only reliable SLO procedure remains to close the browser. 
 
 ## Split the full name from IdP
