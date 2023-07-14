@@ -135,6 +135,15 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         return $moodleattributes;
     }
 
+    /**
+     * Normalize the username from IdP because:
+     * - SAML username are case insensitive and Moodle isn't;
+     * - SAML username has no length limit and Moodle have it.
+     * 
+     * @global type $DB
+     * @param type $username
+     * @return type
+     */
     private function normalize_username($username) {
         global $DB;
 
@@ -184,10 +193,9 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             }
 
             // Make usename lowercase.
-            if ($key == 'username'){
+            if ($key == 'username') {
                 $result[$key] = $this->normalize_username($attributes[$value][0]);
-            }
-            else {
+            } else {
                 $result[$key] = $attributes[$value][0];
             }
         }
@@ -202,7 +210,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
     public function loginpage_hook() {
         global $SESSION;
 
-        if(!isset($SESSION->saml)){
+        if(!isset($SESSION->saml)) {
             $SESSION->saml = '';
         }
 
@@ -217,13 +225,13 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
 
         // If saml=off, go to default login page regardless any other
-        // settings. Useful to administrators to recover from misconfiguration
+        // settings. Useful to administrators to recover from misconfiguration.
         if ($saml == 'off') {
             $SESSION->saml = 'off';
             return;
         }
 
-        // If dual login is disabled or saml=on, the user is redirect to the IdP
+        // If dual login is disabled or saml=on, the user is redirect to the IdP.
         if ($saml == 'on') {
             $SESSION->saml = 'on';
             $this->saml2_login();
@@ -261,9 +269,8 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                 try {
                     // Moodle session is already destroyed, but if the config redirects
                     // to a untrusted URL the user will receive a useless exception.
-                    \SimpleSAML\Utils\HTTP::checkURLAllowed($returnTo);
-                }
-                catch (\Exception $e) {
+                    (new \SimpleSAML\Utils\HTTP())->checkURLAllowed($returnTo);
+                } catch (\Exception $e) {
                     debugging($returnTo . ' is not allowed as redirect URL, check your SSP config.', DEBUG_NORMAL);
                     $returnTo = $CFG->wwwroot; // The root should always be trusted.
                 }
@@ -271,7 +278,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             else {
                 $returnTo = $CFG->wwwroot;
             }
-            
+          
             $urllogout = $auth->getLogoutURL($returnTo);
             redirect($urllogout);
         }
@@ -353,12 +360,12 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             core_user::require_active_user($isuser, true, true);
         }
         else {
-            // Verify if user can be created
+            // Verify if user can be created.
             if ((int) $this->config->autocreate) {
-                // Insert new user
+                // Insert new user.
                 $isuser = create_user_record($uid, '', $this->authtype);
             } else {
-                // If autocreate is not allowed, show error
+                // If autocreate is not allowed, show error.
                 $this->error_page(get_string('nouser', self::COMPONENT_NAME) . $uid);
             }
         }
@@ -372,7 +379,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         $isuser = update_user_record_by_id($isuser->id);
 
-        // now we get the URL to where user wanna go previouly
+        // now we get the URL to where user wanna go previouly.
         $urltogo = core_login_get_return_url();
 
         // and pass to login method
@@ -561,9 +568,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
         $sspconfig = \SimpleSAML\Configuration::getInstance();
         if (version_compare($sspconfig->getVersion(), '1.18.8') < 0) {
+            echo $OUTPUT->notification('SimpleSAMLphp lib is too old ('
+                    . $sspconfig->getVersion() . ') and insecure, you must upgrade it', \core\output\notification::NOTIFY_ERROR);
+        }
+        elseif (version_compare($sspconfig->getVersion(), '2.0.2') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
-                    . $sspconfig->getVersion() . ') and insecure, consider to upgrade it', \core\output\notification::NOTIFY_WARNING);
-        } else {
+                    . $sspconfig->getVersion() . '); this is the latest version supporting 1.x releases', \core\output\notification::NOTIFY_WARNING);
+        }
+        else {
             echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
         }
 
@@ -589,7 +601,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         
         if (!empty($this->config->logout_url_redir)) {
             try {
-                \SimpleSAML\Utils\HTTP::checkURLAllowed($this->config->logout_url_redir);
+                (new \SimpleSAML\Utils\HTTP())->checkURLAllowed($this->config->logout_url_redir);
             }
             catch (\Exception $e) {
                 echo $OUTPUT->notification($this->config->logout_url_redir . ' is not allowed as redirect URL, check SSP config.', \core\output\notification::NOTIFY_WARNING);

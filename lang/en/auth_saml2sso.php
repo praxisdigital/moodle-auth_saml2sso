@@ -41,7 +41,6 @@ $string['label_logout_url_redir']                   = 'Logout URL';
 $string['label_logout']                             = 'Click here to logout';
 $string['label_edit_profile']                       = 'Can user edit profile?';
 $string['label_instructions_title']                 = 'Instructions';
-$string['label_session_control']                    = get_string('limitconcurrentlogins', 'core_auth');
 
 // Help config strings.
 $string['help_button_url']                          = 'Url to an image that will be used as login button. Max 50px high';
@@ -59,9 +58,7 @@ $string['help_logout_url_redir']                    = 'URL to redirect users on 
 $string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile. ' .
         'If the IdP/ADFS doesn\'t provide mandatory attribute the user will be locked out!';
-$string['help_session_control']                     = 'Apply the global setting \''
-                                                    . get_string('limitconcurrentlogins', 'core_auth')
-                                                    . '\' if it is equal to 1, except for admin users.';
+$string['help_session_control']                     = 'Apply the global setting \'{$a}\' if it is equal to 1, except for admin users.';
 
 // Error config strings.
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';
