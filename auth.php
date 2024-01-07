@@ -81,7 +81,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * @since 3.6.0 Dropped support for non namespaced functions
      */
     private function getsspauth() {
-        require_once($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
+        require_once($this->config->sp_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php');
 
         return new \SimpleSAML\Auth\Simple($this->config->authsource);
     }
@@ -560,20 +560,20 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                     . dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR'))
                     . '): it could be fine, but check if the library has been updated', \core\output\notification::NOTIFY_WARNING);
         }
-        if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php') || !file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php')) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib path seems to be invalid', \core\output\notification::NOTIFY_ERROR);
+        if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php')) {
+            echo $OUTPUT->notification('SimpleSAMLphp version seems < 2.x or lib path is invalid', \core\output\notification::NOTIFY_ERROR);
+            return;
+        }
+        if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php')) {
+            echo $OUTPUT->notification('SimpleSAMLphp seems not configured yet or config path is invalid', \core\output\notification::NOTIFY_ERROR);
             return;
         }
 
-        require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
+        require($this->config->sp_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php');
         $sspconfig = \SimpleSAML\Configuration::getInstance();
-        if (version_compare($sspconfig->getVersion(), '1.18.8') < 0) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib is too old ('
-                    . $sspconfig->getVersion() . ') and insecure, you must upgrade it', \core\output\notification::NOTIFY_ERROR);
-        }
-        elseif (version_compare($sspconfig->getVersion(), '2.0.2') < 0) {
+        if (version_compare($sspconfig->getVersion(), '2.0.2') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
-                    . $sspconfig->getVersion() . '); this is the latest version supporting 1.x releases', \core\output\notification::NOTIFY_WARNING);
+                    . $sspconfig->getVersion() . ') and insicure: you should upgrade it', \core\output\notification::NOTIFY_WARNING);
         }
         else {
             echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
@@ -646,14 +646,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                     . 'e-mail address, but the user is not enabled to edit '
                     . 'his profile to add it by himself. Users without e-mail will be locked out by Moodle.',
                     \core\output\notification::NOTIFY_WARNING);
-        }
-
-        if (!empty($this->config->field_idp_fullname)) {
-            echo $OUTPUT->notification('The feature <tt>field_idp_fullname</tt> of splitting the full '
-                    . 'name into the first and the last names '
-                    . 'has been removed. '
-                    . 'Use an authproc in the SimpleSAMLphp config to achieve the same result.',
-                    \core\output\notification::NOTIFY_ERROR);
         }
 
         echo $OUTPUT->notification('Everything seems ok', \core\output\notification::NOTIFY_SUCCESS);

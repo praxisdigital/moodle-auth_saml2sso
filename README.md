@@ -4,7 +4,7 @@
 
 You'll need the following pre-requirement:
 
-* A working SimpleSAMLphp Service Provider (SP) installation (https://simplesamlphp.org) _working means that the metadata from SP must be registered in Identity Provider (IdP). Can be found in /config/authsources.php_
+* A working SimpleSAMLphp >= 2.x Service Provider (SP) installation (https://simplesamlphp.org) where "working" means that the metadata from SP must be registered in Identity Provider (IdP). Can be found in /config/authsources.php
 * The absolute path for the SimpleSAMLphp installation on server (autodetected if the Apache enviroment variable is set)
 * The authsource name from SP in which your users will authenticate against
 
@@ -13,12 +13,12 @@ You are strongly encouraged to use a [SimpleSAMLphp session storage](https://sim
 There are other SAML plugins for Moodle and the panorama could be confusing.
 Below are the main differences between this plugin, named internally as **auth_saml2sso**, and the others:
 
-* [official Shibboleth plugin](https://docs.moodle.org/35/en/Shibboleth) - Requires a system-level configuration, uses a long-running process, easily protects resource at Apache level, cannot exploit PHP skill, hard to configure for servers hosting multiple Moodle if requirements of each site are different.
-* [SAML Authentication (auth_saml)](https://moodle.org/plugins/auth_saml) - There is a new release of this plugin since mid of 2019. Handles enrollment based on attribute passed by the IdP.
-* [SAML2 Single sign on (auth_saml2)](https://moodle.org/plugins/auth_saml2) - It's a complete solution for those that don't have a working SSP installation, but because it instantiate its own SP, for every single  Moodle virtual host that you activate, you must exchange the metadata with the IdP, replicate SSP config, update libraries, etc... It could be a good solution for a single Moodle site without specific requirement in authentication process, but it seems unsuitable for complex environments.
-* [OneLogin SAML SSO (onelogin_saml)](https://github.com/onelogin/moodle-saml) - Based on OneLogin libraries, features similar to auth_saml2
+* [official Shibboleth plugin](https://docs.moodle.org/402/en/Shibboleth) - Requires a system-level configuration, uses a long-running process, easily protects resource at Apache level, cannot exploit PHP skill, hard to configure for servers hosting multiple Moodle if requirements of each site are different.
+* [SAML Authentication (auth_saml)](https://moodle.org/plugins/auth_saml) - There is no new release since mid of 2019 (Moodle 3.7). Handles enrollment based on attribute passed by the IdP.
+* [SAML2 Single sign on (auth_saml2)](https://moodle.org/plugins/auth_saml2) - It's a complete solution for those that don't have a working SSP installation, but because it instantiate its own SP, for every single Moodle virtual host that you activate, you must exchange the metadata with the IdP, replicate SSP config, update libraries, activate authproc filter, etc... It could be a good solution for a single Moodle site without specific requirement in authentication process, but it seems unsuitable for complex environments.
+* [OneLogin SAML SSO (onelogin_saml)](https://github.com/onelogin/moodle-saml) - Not updated since 2021. Based on OneLogin libraries, features similar to auth_saml2
 
-The key for this plugin is that you can use your exists Service Provider (SP) without needed to exchange the metadata with the Identity Provider (IdP) for every new Moodle instances. _(for instances in the same host name)_
+The key for this plugin is that you can leverage on your exists Service Provider (SP) installation without needed to configure the SP and the metadata for every website hosted, Moodle or not.
 
 ## The following options can be set in config:
 
@@ -47,6 +47,7 @@ If you can replace it with a SimpleSAMLphp authproc filter: see below.
 
 ## SimpleSAMLphp upgrade to 2.x
 
+New plugin releases (>= 4.3.0) require SimpleSAMLphp >= 2.x.
 Some static methods in SSP 1.x have been migrated to non-static in SSP 2.x; older version of this plugin (<2023071100) could raise errors during signoff if used with SSP 2.x library.
 
 ## Limit concurrent logins
