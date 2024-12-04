@@ -299,7 +299,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Admins can have multiple sessions.
         $apply_session_control = !is_siteadmin($USER->id)
                 && $this->config->session_control
-                && $CFG->limitconcurrentlogins == 1;
+                && $CFG->limitconcurrentlogins >= 1;
         if ($apply_session_control) {
             // Force a reauthentication even if a SSO session is active in the SP.
             // Throw away the POST values because after reauthentication user must
@@ -394,7 +394,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      */
     protected function do_login($user, $urltogo) {
         global $USER, $CFG;
-
+        
         $USER = complete_user_login($user);
         $USER->loggedin = true;
         $USER->site = $CFG->wwwroot;
