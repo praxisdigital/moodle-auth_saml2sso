@@ -81,7 +81,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * @since 3.6.0 Dropped support for non namespaced functions
      */
     private function getsspauth() {
-        require_once($this->config->sp_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php');
+        auth_saml2sso\load_ssp_lib($this->config->sp_path);
 
         return new \SimpleSAML\Auth\Simple($this->config->authsource);
     }
