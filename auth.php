@@ -295,6 +295,9 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         $auth = $this->getsspauth();
         $param = ['KeepPost' => true];
+        if ($this->config->force_authn) {
+            $param['ForceAuthn'] = true;
+        }
 
         // Admins can have multiple sessions.
         $apply_session_control = !is_siteadmin($USER->id)
@@ -316,7 +319,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Moodle session changed within the same local SSO session.
         if (!empty($prevmoodlesession) && $prevmoodlesession != session_id()) {
             if ($apply_session_control) {
-                $event = \auth_saml2sso\event\user_kicked_off::create(array());
+                $event = \auth_saml2sso\event\user_kicked_off::create();
                 $event->trigger();
             }
             $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
@@ -339,7 +342,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Will be used to get user from our Moodle database if exists
         // create_user_record lowercases the username, so we need to lower it here.
         if (empty($saml_attributes[$this->config->idpattr])) {
-            $event = \auth_saml2sso\event\not_searchable::create(array());
+            $event = \auth_saml2sso\event\not_searchable::create();
             $event->trigger();
             $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
         }
@@ -348,12 +351,16 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Get attributes from the assertion already mapped to Moodle fields.
         $userinfo = $this->get_userinfo($uid);
         if (empty($userinfo[$this->config->moodle_mapping])) {
-            $event = \auth_saml2sso\event\not_searchable::create(array());
+            $event = \auth_saml2sso\event\not_searchable::create();
             $event->trigger();
             $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
         }
-        // Now we check if the key returned from IdP exists in our Moodle database.
-        $criteria = array($this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]);
+        // Now we check if the key returned from IdP exists in the Moodle user database
+        // for this authentication type.
+        $criteria = [
+            'auth' => $this->authtype,
+            $this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]
+        ];
         $isuser = $DB->get_record('user', $criteria);
         
         if (!empty($isuser)) {
@@ -362,11 +369,25 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         else {
             // Verify if user can be created.
             if ((int) $this->config->autocreate) {
+                // Check the user is not existing belonging another plugin.
+                $criteria = [
+                    $this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]
+                ];
+                $exists = $DB->get_record('user', $criteria);
+                if ($exists) {
+                    // Log the event only if dual login is disable; if enable could be a wrong action by the user.
+                    if (!$this->config->dual_login) {
+                        $event = \auth_saml2sso\event\duplicate_user::event_duplicate_user($this->config->moodle_mapping,
+                                s($userinfo[$this->config->moodle_mapping]), $exists->auth);
+                        $event->trigger();
+                    }
+                    $this->error_page(get_string('duplicateuser', self::COMPONENT_NAME));
+                }
                 // Insert new user.
                 $isuser = create_user_record($uid, '', $this->authtype);
             } else {
                 // If autocreate is not allowed, show error.
-                $this->error_page(get_string('nouser', self::COMPONENT_NAME) . $uid);
+                $this->error_page(get_string('nouser', self::COMPONENT_NAME));
             }
         }
 

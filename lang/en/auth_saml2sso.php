@@ -55,10 +55,13 @@ $string['help_moodle_mapping']                      = 'Where to check if the use
 $string['help_autocreate']                          = 'Allow create new users?';
 $string['help_authsource']                          = 'Service Provider authentication source name available in /config/authsources.php SimpleSAMLphp installation';
 $string['help_logout_url_redir']                    = 'URL to redirect users on logout. If the URL is invalid or empty, it will redirect to Moodle main page. (ex.: https://goto/another/url). Remember to include this url in the <tt>trusted.url.domains</tt> SSP config.';
-$string['nouser']                                   = 'There is no user with the provided Id and auto signup is not allowed. The provided Id is: ';
+$string['nouser']                                   = 'User not found in this site and auto-registration is not allowed. Login failed.';
+$string['duplicateuser']                            = 'Authentication method is not valid or is disable, try another one if available or contact the site admin.';
 $string['help_edit_profile']                        = 'If users cannot edit profile, they won\'t see the link to profile. ' .
         'If the IdP/ADFS doesn\'t provide mandatory attribute the user will be locked out!';
-$string['help_session_control']                     = 'Apply the global setting \'{$a}\' if it is equal to 1, except for admin users.';
+$string['help_session_control']                     = 'Apply the global setting \'{$a}\' if it is >= 1, except for admin users.';
+$string['label_force_authn']                        = 'Always request auth';
+$string['help_force_authn']                         = 'At the Moodle login, user must authenticate even if he/she has a valid SSO session.';
 
 // Error config strings.
 $string['error_create_user']                        = 'A error occured when create a user account. Please, contact the administrator.';
@@ -119,8 +122,10 @@ $string['takeover_count_migrated']      = '{$a->count} users imported from {$a->
 $string['event_user_migrate']       = 'User imported';
 $string['event_user_migrate_desc']  = 'The user has been migrated to ' . $string['pluginname'];
 $string['event_not_searchable']         = 'Not identifiable SSO user';
-$string['event_not_searchable_desc']    = 'The IdP doesn\'t provided the attribute need to search for the user';
+$string['event_not_searchable_desc']    = 'The IdP doesn\'t provided any attributes need to search for the user';
 $string['event_user_kicked_off']        = 'Old sessions killed';
 $string['event_user_kicked_off_desc']   = 'The user has activated a new Moodle session while the concurrent login limit was active: old sessions have been destroyed and unsaved data ignored';
+$string['event_duplicate_user']       = 'Duplicate user';
+$string['event_duplicate_user_desc']  = 'A user with {$a->key} \'{$a->id}\' is already registered by the plugin {$a->auth}. Cannot create a new account ' . $string['pluginname'];
 
 $string['privacy:metadata'] = 'The SAML2 SSO authentication plugin does not store any personal data.';
