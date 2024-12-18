@@ -65,6 +65,8 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         'idnumber' => 'idnumber',
     );
 
+    public object $mapping;
+
     /**
      * Constructor
      */
