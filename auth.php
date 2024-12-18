@@ -332,9 +332,11 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
 
         // Save the Moodle session ID in the local SSO session data.
+        $timeout = !empty($CFG->sessiontimeout) && intval($CFG->sessiontimeout) > 0 ? intval($CFG->sessiontimeout) : null;
         $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
             'moodle:' . get_site_identifier() . 'session',
-            session_id()
+            session_id(),
+            $timeout
         );
             
         $saml_attributes = $auth->getAttributes();  // Attributes from SAML assertion.
