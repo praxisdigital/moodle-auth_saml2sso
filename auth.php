@@ -598,7 +598,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
             echo $OUTPUT->notification('SimpleSAMLphp lib version ('
                     . $sspconfig->getVersion() . ') is not supported, this plugin requires a 2.x release', \core\output\notification::NOTIFY_ERROR);
         }
-        elseif (version_compare($sspconfig->getVersion(), '2.0.2') < 0) {
+        elseif (version_compare($sspconfig->getVersion(), '2.3.4') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
                     . $sspconfig->getVersion() . ') and insicure: you should upgrade it', \core\output\notification::NOTIFY_WARNING);
         }
