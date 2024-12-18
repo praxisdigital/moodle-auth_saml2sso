@@ -64,16 +64,37 @@ if ($ADMIN->fulltree) {
     );
     
     $field_setting = 'authsource';
-    $settings->add(new admin_setting_configtext_with_maxlength(
-            'auth_saml2sso/'. $field_setting,
-            new lang_string('label_' . $field_setting, 'auth_saml2sso'),
-            new lang_string('help_' . $field_setting, 'auth_saml2sso'),
-            '',
-            PARAM_TEXT,
-            50,
-            255
-        )
-    );
+    if (auth_saml2sso\load_ssp_lib(get_config(auth_saml2sso\COMPONENT_NAME, 'sp_path'))) {
+        $fields = [];
+        foreach(\SimpleSAML\Auth\Source::getSources() as $authsource) {
+            if ($authsource == 'admin') {
+                // Skip builtin admin.
+                continue;
+            }
+            $fields[$authsource] = $authsource;
+        }
+        $fields[''] = null;
+        $settings->add(new admin_setting_configselect(
+                'auth_saml2sso/' . $field_setting,
+                new lang_string('label_' . $field_setting, 'auth_saml2sso'),
+                new lang_string('help_' . $field_setting, 'auth_saml2sso'),
+                0,
+                $fields
+            )
+        );
+    }
+    else {
+        $settings->add(new admin_setting_configtext_with_maxlength(
+                'auth_saml2sso/'. $field_setting,
+                new lang_string('label_' . $field_setting, 'auth_saml2sso'),
+                new lang_string('help_' . $field_setting, 'auth_saml2sso'),
+                '',
+                PARAM_TEXT,
+                50,
+                255
+            )
+        );
+    }
 
     $field_setting = 'single_signoff';
     $settings->add(new admin_setting_configselect(
@@ -134,6 +155,16 @@ if ($ADMIN->fulltree) {
         )
     );
     
+    $field_setting = 'force_authn';
+    $settings->add(new admin_setting_configselect(
+            'auth_saml2sso/' . $field_setting, 
+            new lang_string('label_' . $field_setting, 'auth_saml2sso'), 
+            new lang_string('help_' . $field_setting, 'auth_saml2sso', get_string('limitconcurrentlogins', 'core_auth')), 
+            0, 
+            $yesno
+        )
+    );
+    
     $field_setting = 'session_control';
     $settings->add(new admin_setting_configselect(
             'auth_saml2sso/' . $field_setting, 
@@ -143,7 +174,7 @@ if ($ADMIN->fulltree) {
             $yesno
         )
     );
-    
+
     // Dual login settings
     $settings->add(new admin_setting_heading('auth_saml2sso/dual_login_settings',
             new lang_string('label_dual_login_settings', 'auth_saml2sso'),

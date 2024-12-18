@@ -33,6 +33,19 @@ const LOCAL_AUTH_PLUGINS = [
     'webservice' => true,
 ];
 
+function load_ssp_lib($path) {
+    if (empty($path)) {
+        return false;
+    }
+    if (!file_exists($path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php')) {
+        return false;
+    }
+    
+    require_once($path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php');
+
+    return true;
+}
+
 require_once 'classes/event/user_migrated.php';
 
 /**

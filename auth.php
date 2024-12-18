@@ -81,7 +81,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      * @since 3.6.0 Dropped support for non namespaced functions
      */
     private function getsspauth() {
-        require_once($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
+        auth_saml2sso\load_ssp_lib($this->config->sp_path);
 
         return new \SimpleSAML\Auth\Simple($this->config->authsource);
     }
@@ -295,11 +295,14 @@ class auth_plugin_saml2sso extends auth_plugin_base {
 
         $auth = $this->getsspauth();
         $param = ['KeepPost' => true];
+        if ($this->config->force_authn) {
+            $param['ForceAuthn'] = true;
+        }
 
         // Admins can have multiple sessions.
         $apply_session_control = !is_siteadmin($USER->id)
                 && $this->config->session_control
-                && $CFG->limitconcurrentlogins == 1;
+                && $CFG->limitconcurrentlogins >= 1;
         if ($apply_session_control) {
             // Force a reauthentication even if a SSO session is active in the SP.
             // Throw away the POST values because after reauthentication user must
@@ -316,7 +319,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Moodle session changed within the same local SSO session.
         if (!empty($prevmoodlesession) && $prevmoodlesession != session_id()) {
             if ($apply_session_control) {
-                $event = \auth_saml2sso\event\user_kicked_off::create(array());
+                $event = \auth_saml2sso\event\user_kicked_off::create();
                 $event->trigger();
             }
             $sspsession->deleteData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
@@ -329,9 +332,11 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         }
 
         // Save the Moodle session ID in the local SSO session data.
+        $timeout = !empty($CFG->sessiontimeout) && intval($CFG->sessiontimeout) > 0 ? intval($CFG->sessiontimeout) : null;
         $sspsession->setData('\Moodle\\' . \auth_saml2sso\COMPONENT_NAME, 
             'moodle:' . get_site_identifier() . 'session',
-            session_id()
+            session_id(),
+            $timeout
         );
             
         $saml_attributes = $auth->getAttributes();  // Attributes from SAML assertion.
@@ -339,7 +344,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Will be used to get user from our Moodle database if exists
         // create_user_record lowercases the username, so we need to lower it here.
         if (empty($saml_attributes[$this->config->idpattr])) {
-            $event = \auth_saml2sso\event\not_searchable::create(array());
+            $event = \auth_saml2sso\event\not_searchable::create();
             $event->trigger();
             $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
         }
@@ -348,12 +353,16 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         // Get attributes from the assertion already mapped to Moodle fields.
         $userinfo = $this->get_userinfo($uid);
         if (empty($userinfo[$this->config->moodle_mapping])) {
-            $event = \auth_saml2sso\event\not_searchable::create(array());
+            $event = \auth_saml2sso\event\not_searchable::create();
             $event->trigger();
             $this->error_page(get_string('error_nokey', \auth_saml2sso\COMPONENT_NAME));
         }
-        // Now we check if the key returned from IdP exists in our Moodle database.
-        $criteria = array($this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]);
+        // Now we check if the key returned from IdP exists in the Moodle user database
+        // for this authentication type.
+        $criteria = [
+            'auth' => $this->authtype,
+            $this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]
+        ];
         $isuser = $DB->get_record('user', $criteria);
         
         if (!empty($isuser)) {
@@ -362,11 +371,25 @@ class auth_plugin_saml2sso extends auth_plugin_base {
         else {
             // Verify if user can be created.
             if ((int) $this->config->autocreate) {
+                // Check the user is not existing belonging another plugin.
+                $criteria = [
+                    $this->config->moodle_mapping => $userinfo[$this->config->moodle_mapping]
+                ];
+                $exists = $DB->get_record('user', $criteria);
+                if ($exists) {
+                    // Log the event only if dual login is disable; if enable could be a wrong action by the user.
+                    if (!$this->config->dual_login) {
+                        $event = \auth_saml2sso\event\duplicate_user::event_duplicate_user($this->config->moodle_mapping,
+                                s($userinfo[$this->config->moodle_mapping]), $exists->auth);
+                        $event->trigger();
+                    }
+                    $this->error_page(get_string('duplicateuser', self::COMPONENT_NAME));
+                }
                 // Insert new user.
                 $isuser = create_user_record($uid, '', $this->authtype);
             } else {
                 // If autocreate is not allowed, show error.
-                $this->error_page(get_string('nouser', self::COMPONENT_NAME) . $uid);
+                $this->error_page(get_string('nouser', self::COMPONENT_NAME));
             }
         }
 
@@ -394,7 +417,7 @@ class auth_plugin_saml2sso extends auth_plugin_base {
      */
     protected function do_login($user, $urltogo) {
         global $USER, $CFG;
-
+        
         $USER = complete_user_login($user);
         $USER->loggedin = true;
         $USER->site = $CFG->wwwroot;
@@ -560,20 +583,24 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                     . dirname(getenv('SIMPLESAMLPHP_CONFIG_DIR'))
                     . '): it could be fine, but check if the library has been updated', \core\output\notification::NOTIFY_WARNING);
         }
-        if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php') || !file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php')) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib path seems to be invalid', \core\output\notification::NOTIFY_ERROR);
+        if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php')) {
+            echo $OUTPUT->notification('SimpleSAMLphp version seems < 2.x or lib path is invalid', \core\output\notification::NOTIFY_ERROR);
+            return;
+        }
+        if (!file_exists($this->config->sp_path . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php')) {
+            echo $OUTPUT->notification('SimpleSAMLphp seems not configured yet or config path is invalid', \core\output\notification::NOTIFY_ERROR);
             return;
         }
 
-        require($this->config->sp_path . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php');
+        require($this->config->sp_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '_autoload.php');
         $sspconfig = \SimpleSAML\Configuration::getInstance();
-        if (version_compare($sspconfig->getVersion(), '1.18.8') < 0) {
-            echo $OUTPUT->notification('SimpleSAMLphp lib is too old ('
-                    . $sspconfig->getVersion() . ') and insecure, you must upgrade it', \core\output\notification::NOTIFY_ERROR);
+        if (version_compare($sspconfig->getVersion(), '2.0.0') < 0) {
+            echo $OUTPUT->notification('SimpleSAMLphp lib version ('
+                    . $sspconfig->getVersion() . ') is not supported, this plugin requires a 2.x release', \core\output\notification::NOTIFY_ERROR);
         }
-        elseif (version_compare($sspconfig->getVersion(), '2.0.2') < 0) {
+        elseif (version_compare($sspconfig->getVersion(), '2.3.4') < 0) {
             echo $OUTPUT->notification('SimpleSAMLphp lib seems too old ('
-                    . $sspconfig->getVersion() . '); this is the latest version supporting 1.x releases', \core\output\notification::NOTIFY_WARNING);
+                    . $sspconfig->getVersion() . ') and insicure: you should upgrade it', \core\output\notification::NOTIFY_WARNING);
         }
         else {
             echo $OUTPUT->notification('SimpleSAMLphp version is ' . $sspconfig->getVersion(), \core\output\notification::NOTIFY_INFO);
@@ -646,14 +673,6 @@ class auth_plugin_saml2sso extends auth_plugin_base {
                     . 'e-mail address, but the user is not enabled to edit '
                     . 'his profile to add it by himself. Users without e-mail will be locked out by Moodle.',
                     \core\output\notification::NOTIFY_WARNING);
-        }
-
-        if (!empty($this->config->field_idp_fullname)) {
-            echo $OUTPUT->notification('The feature <tt>field_idp_fullname</tt> of splitting the full '
-                    . 'name into the first and the last names '
-                    . 'has been removed. '
-                    . 'Use an authproc in the SimpleSAMLphp config to achieve the same result.',
-                    \core\output\notification::NOTIFY_ERROR);
         }
 
         echo $OUTPUT->notification('Everything seems ok', \core\output\notification::NOTIFY_SUCCESS);

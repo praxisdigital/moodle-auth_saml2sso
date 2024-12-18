@@ -4,7 +4,7 @@
 
 You'll need the following pre-requirement:
 
-* A working SimpleSAMLphp Service Provider (SP) installation (https://simplesamlphp.org) _working means that the metadata from SP must be registered in Identity Provider (IdP). Can be found in /config/authsources.php_
+* A working SimpleSAMLphp >= 2.x Service Provider (SP) installation (https://simplesamlphp.org) where "working" means that the metadata from SP must be registered in Identity Provider (IdP). Can be found in /config/authsources.php
 * The absolute path for the SimpleSAMLphp installation on server (autodetected if the Apache enviroment variable is set)
 * The authsource name from SP in which your users will authenticate against
 
@@ -13,12 +13,12 @@ You are strongly encouraged to use a [SimpleSAMLphp session storage](https://sim
 There are other SAML plugins for Moodle and the panorama could be confusing.
 Below are the main differences between this plugin, named internally as **auth_saml2sso**, and the others:
 
-* [official Shibboleth plugin](https://docs.moodle.org/35/en/Shibboleth) - Requires a system-level configuration, uses a long-running process, easily protects resource at Apache level, cannot exploit PHP skill, hard to configure for servers hosting multiple Moodle if requirements of each site are different.
-* [SAML Authentication (auth_saml)](https://moodle.org/plugins/auth_saml) - There is a new release of this plugin since mid of 2019. Handles enrollment based on attribute passed by the IdP.
-* [SAML2 Single sign on (auth_saml2)](https://moodle.org/plugins/auth_saml2) - It's a complete solution for those that don't have a working SSP installation, but because it instantiate its own SP, for every single  Moodle virtual host that you activate, you must exchange the metadata with the IdP, replicate SSP config, update libraries, etc... It could be a good solution for a single Moodle site without specific requirement in authentication process, but it seems unsuitable for complex environments.
-* [OneLogin SAML SSO (onelogin_saml)](https://github.com/onelogin/moodle-saml) - Based on OneLogin libraries, features similar to auth_saml2
+* [official Shibboleth plugin](https://docs.moodle.org/402/en/Shibboleth) - Requires a system-level configuration, uses a long-running process, easily protects resource at Apache level, cannot exploit PHP skill, hard to configure for servers hosting multiple Moodle if requirements of each site are different.
+* [SAML Authentication (auth_saml)](https://moodle.org/plugins/auth_saml) - There is no new release since mid of 2019 (Moodle 3.7). Handles enrollment based on attribute passed by the IdP.
+* [SAML2 Single sign on (auth_saml2)](https://moodle.org/plugins/auth_saml2) - It's a complete solution for those that don't have a working SSP installation, but because it instantiate its own SP, for every single Moodle virtual host that you activate, you must exchange the metadata with the IdP, replicate SSP config, update libraries, activate authproc filter, etc... It could be a good solution for a single Moodle site without specific requirement in authentication process, but it seems unsuitable for complex environments.
+* [OneLogin SAML SSO (onelogin_saml)](https://github.com/onelogin/moodle-saml) - Not updated since 2021. Based on OneLogin libraries, features similar to auth_saml2
 
-The key for this plugin is that you can use your exists Service Provider (SP) without needed to exchange the metadata with the Identity Provider (IdP) for every new Moodle instances. _(for instances in the same host name)_
+The key for this plugin is that you can leverage on your exists Service Provider (SP) installation without needed to configure the SP and the metadata for every website hosted, Moodle or not.
 
 ## The following options can be set in config:
 
@@ -29,6 +29,7 @@ The key for this plugin is that you can use your exists Service Provider (SP) wi
 * Username mapping - Which attribute from IdP should be used for username
 * Username checking - Where to check if the username exists
 * Auto create users - Allow create new users
+* **new** Force IdP re-authentication after Moodle logoout with "[Always request auth](#Always-request-auth)" options
 * [Limit concurrent logins](#Limit-concurrent-logins) to 1 if configured as global setting
 * Dual login (Yes/No) - Can login with manual accounts like admin
 * User synchronization source (see below)
@@ -47,10 +48,11 @@ If you can replace it with a SimpleSAMLphp authproc filter: see below.
 
 ## SimpleSAMLphp upgrade to 2.x
 
+New plugin releases (>= 4.3.0) require SimpleSAMLphp >= 2.x.
 Some static methods in SSP 1.x have been migrated to non-static in SSP 2.x; older version of this plugin (<2023071100) could raise errors during signoff if used with SSP 2.x library.
 
 ## Limit concurrent logins
-According Moodle documentation, SSO-auth modules don't apply "limit concurrent logins" restriction.
+According Moodle documentation, core SSO-auth modules (Shibboleth, CAS) don't apply "limit concurrent logins" restriction.
 
 https://tracker.moodle.org/browse/MDL-62753?jql=text%20~%20%22session%20kill%22
 
@@ -58,18 +60,26 @@ https://moodle.org/mod/forum/discuss.php?d=387784
 
 Probably this is due to the mismatch between the Moodle session and the local SSO session.
 
-Since SimpleSAMLphp API can interact with the local SSO session, this plugin supports the concurrent logins limit if it is set to 1.
-This is a common scenario for exams, while limits > 1 have not clear purposes.
+Instead, this plugin **supports the concurrent logins** limit if it is set to >= 1. It is possible because SimpleSAMLphp API can interact with the local SSO session.
+This is a common scenario for exams. However limits > 1 have not a clear purpose and only one session will be available to SSO accounts.
+
+## Always request auth
+With this option enabled, the SAML AuthnRequest always contains a [ForceAuthn](https://simplesamlphp.org/docs/stable/saml/sp.html) that asks to the IdP to re-authenticate the user even if a valid SSO session exists. 
+Should also note that while the IdP may honor ForceAuthn, depending on how it actually authenticates (e.g. Kerberos or X.509), there may not be real interaction with the user. 
+Another issue depends on whether the IdP refreshes the current SP session or creates a new one. In the latter case, if your Moodle server hosts multiple sites sharing SimpleSAMLphp, a non homogeneous configuration can lead to erratic behavior. In this situation, set ForceAuthn in the SSP config. 
 
 ## Single Sign Off
 SAML Single Sign Off (or better *SLO - Single LogOut*) is a tricky topic, Scott Cantor wrote a wide overview of the problem in the [Shibboleth wiki](https://shibboleth.atlassian.net/wiki/spaces/SHIB2/pages/2583494696/IdPEnableSLO).
 Regarding this Moodle plugin:
 
-* if Single Sign Off is disabled, logout from Moodle will leave SimpleSAMLphp local session untouched thus if the user click on SSO Login again she/he will log in Moodle without any password request. To avoid this confusing user experience, you could either set ForceAuthn to true in SP config or [limit concurrent logins](#Limit-concurrent-logins) in Moodle
+* if Single Sign Off is disabled, logout from Moodle will leave SimpleSAMLphp local session untouched thus if the user click on SSO Login again she/he will log in Moodle without any password request. To avoid this confusing user experience, you could either set [Always request auth](#Always-request-auth) or [limit concurrent logins](#Limit-concurrent-logins) in Moodle
 * if Single Sign Off is enabled, exiting from Moodle first destroyes the Moodle session, then starts with the IdP a SLO procedure that *should* kill any SP sessions in any application you logged-in; unfortunately, killing a SP session often **doesn't** destroy the application session protected by that SP, as you can see below
 * either Single Sign Off is enabled or not, if a third application starts a SLO process, the local SP session will be destroyed according SP metadata but the Moodle session will remain alive because there is no entry point in Moodle auth plugin interface to check if a session is still valid nor can SimpleSAMLphp invoke a callback in the Moodle codebase
 
-The only reliable SLO procedure remains to close the browser. 
+The only reliable SLO procedure remains to close the browser.
+
+## MFA support
+Since 4.3 Moodle has MFA in the core. This plugin is compatible with built-in MFA.
 
 ## Split the full name from IdP
 One of the distinctive feature of the first release of SAML2 SSO plugin was the ability to
@@ -77,7 +87,7 @@ break the full name from IdP into the first name and the last name.
 It was related to the old version of Moodle auth base plugin and this feature will be removed in the next release.
 
 Nowadays, adminting there are some IdPs still serving the full name and not 
-the first and last name (such as givenName and sn in LDAP idiom) you can use a
+the first and last name (such as *givenName* and *sn* in LDAP idiom) you can use a
 SimpleSAMLphp *authproc*.
 
 For example, in order to replicate the old behaviour if you receive

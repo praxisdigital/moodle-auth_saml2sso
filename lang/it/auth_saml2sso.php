@@ -55,10 +55,13 @@ $string['help_moodle_mapping']                      = 'Il campo del profilo Mood
 $string['help_autocreate']                          = 'Crea l\'utente Moodle all\'accesso se non presente';
 $string['help_authsource']                          = 'Nome della sorgente di autenticazione del Service Provider, come registrata in /config/authsources.php';
 $string['help_logout_url_redir']                    = 'URL a cui ridirigere dopo il logout. Se non è valido o vuoto, si verrà rediretti alla pagina principale di Moodle. (es.: https://go.to/another/url). Ricordatevi di includere questo URL in <tt>trusted.url.domains</tt> della configurazione di SSP.';
-$string['nouser']                                   = 'Non c\'è un utente Moodle con l\'id restituito e la creazione automatica è disabilitata. L\'id restituito è: ';
+$string['nouser']                                   = 'Utente non trovato in questo sito e registrazione automatica disabilitata. Login non possibile.';
+$string['duplicateuser']                            = 'Metodo di autenticazione non valido o disabilitato, provane un altro se disponibile o contatta l\'amministratore';
 $string['help_edit_profile']                        = 'Se gli utenti non possono modificare il proprio profilo, non vedranno il link al profilo. ' .
         'Se l\'IdP/ADFS non fornisce gli attributi obbligatori l\'utente non potrà accedere!';
-$string['help_session_control']                     = 'Rispetta l\'opzione \'{$a}\' se è impostata a 1, eccetto per gli utenti amministratori.';
+$string['help_session_control']                     = 'Rispetta l\'opzione \'{$a}\' se è impostata a 1 o più, eccetto per gli utenti amministratori.';
+$string['label_force_authn']                        = 'Richiedi sempre autenticazione';
+$string['help_force_authn']                         = 'Al login Moodle, l\'utente deve comunque autenticarsi anche se ha una sessione SSO attiva.';
 
 // Error config strings.
 $string['error_create_user']                        = 'Errore nella creazione del profilo Moodle. Contattare l\'amministratore.';
@@ -121,8 +124,10 @@ $string['takeover_count_migrated']      = '{$a->count} utenti importati da {$a->
 $string['event_user_migrate']       = 'Utente importato';
 $string['event_user_migrate_desc']  = 'L\'utente è stato convertito per usare ' . $string['pluginname'];
 $string['event_not_searchable']         = 'Utente SSO non identificabile';
-$string['event_not_searchable_desc']    = 'L\'IdP non ha fornito l\'attributo richiesto per cercare l\'utente';
+$string['event_not_searchable_desc']    = 'L\'IdP non ha fornito alcun attributo necessario per trovare l\'utente';
 $string['event_user_kicked_off']        = 'Annullate vecchie sessioni';
 $string['event_user_kicked_off_desc']   = 'L\'utente ha attivato una nuova sessione Moodle mentre il limite di autenticazioni contemporanee era attivo: le sessioni vecchie sono state eliminate e i dati non salvati ignorati';
+$string['event_duplicate_user']       = 'Utente duplicato';
+$string['event_duplicate_user_desc']  = 'Un utente con {$a->key} \'{$a->id}\' è già registrato dal plugin {$a->auth}. Non è possibile creare un nuovo utente ' . $string['pluginname'];
 
 $string['privacy:metadata'] = 'Il plugin di autenticazione SAML2 SSO non registra alcun dato personale.';
